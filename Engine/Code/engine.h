@@ -93,3 +93,4 @@ void Update(App* app);
 
 void Render(App* app);
 
+void CleanUp(App* app);

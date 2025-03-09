@@ -327,3 +327,48 @@ void Render(App* app)
     }
 }
 
+void CleanUp(App* app)
+{
+    ELOG("Cleaning Up Engine");
+
+    // TODO: Deinitialize your resources here!
+    // - vertex buffers
+    // - element/index buffers
+    // - vaos
+    // - programs (and retrieve uniform indices)
+    // - textures
+
+    // Delete textures
+    for (auto& texture : app->textures)
+    {
+        glDeleteTextures(1, &texture.handle);
+    }
+    app->textures.clear();
+
+    // Delete shader programs
+    for (auto& program : app->programs)
+    {
+        glDeleteProgram(program.handle);
+    }
+    app->programs.clear();
+
+    // Delete VAO
+    if (app->vao != 0)
+    {
+        glDeleteVertexArrays(1, &app->vao);
+        app->vao = 0;
+    }
+
+    // Delete buffers
+    if (app->embeddedElements != 0)
+    {
+        glDeleteBuffers(1, &app->embeddedElements);
+        app->embeddedElements = 0;
+    }
+
+    if (app->embeddedVertices != 0)
+    {
+        glDeleteBuffers(1, &app->embeddedVertices);
+        app->embeddedVertices = 0;
+    }
+}
