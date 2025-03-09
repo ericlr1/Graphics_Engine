@@ -195,6 +195,28 @@ void Gui(App* app)
     ImGui::Begin("Info");
     ImGui::Text("FPS: %f", 1.0f/app->deltaTime);
     ImGui::End();
+
+    ImGui::Begin("OpenGL Info");
+    // Display basic OpenGL information
+    ImGui::Text("OpenGL version: %s", (const char*)glGetString(GL_VERSION));
+    ImGui::Text("OpenGL renderer: %s", (const char*)glGetString(GL_RENDERER));
+    ImGui::Text("OpenGL vendor: %s", (const char*)glGetString(GL_VENDOR));
+    ImGui::Text("OpenGL GLSL version: %s", (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    // Display extensions in a scrollable child window
+    ImGui::Separator();
+    ImGui::Text("OpenGL Extensions:");
+    ImGui::BeginChild("Extensions", ImVec2(0, 100), false, ImGuiWindowFlags_HorizontalScrollbar);
+    GLint num_extensions = 0;
+    glGetIntegerv(GL_NUM_EXTENSIONS, &num_extensions);
+    for (GLint i = 0; i < num_extensions; ++i)
+    {
+        const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);
+        ImGui::Text("%s", extension);
+    }
+    ImGui::EndChild();
+
+    ImGui::End();
 }
 
 void Update(App* app)
