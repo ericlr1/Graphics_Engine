@@ -1,3 +1,15 @@
-﻿  engine.cpp
+﻿  buffer_managment.cpp
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.cpp(64,1): warning C4005: 'PushUInt': redefinición de macro
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(49): message : vea la definición anterior de 'PushUInt'
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.cpp(65,1): warning C4005: 'PushVec3': redefinición de macro
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(50): message : vea la definición anterior de 'PushVec3'
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.cpp(66,1): warning C4005: 'PushVec4': redefinición de macro
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(51): message : vea la definición anterior de 'PushVec4'
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.cpp(67,1): warning C4005: 'PushMat3': redefinición de macro
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(52): message : vea la definición anterior de 'PushMat3'
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.cpp(68,1): warning C4005: 'PushMat4': redefinición de macro
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(53): message : vea la definición anterior de 'PushMat4'
+  engine.cpp
+  Generando código...
 LINK : warning LNK4098: la biblioteca predeterminada'MSVCRT' entra en conflicto con otras bibliotecas; use la biblioteca /NODEFAULTLIB:biblioteca
   Engine.vcxproj -> C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\x64\Debug\Engine.exe

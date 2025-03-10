@@ -285,6 +285,8 @@ void Gui(App* app)
 void Update(App* app)
 {
     // You can handle app->input keyboard/mouse here
+
+    //TODO: Meter aqui que con un Ctrl + S haga un hotreload del shader
 }
 
 void Render(App* app)
