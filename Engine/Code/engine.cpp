@@ -10,6 +10,8 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 
+
+
 GLuint CreateProgramFromSource(String programSource, const char* shaderName)
 {
     GLchar  infoLogBuffer[1024] = {};

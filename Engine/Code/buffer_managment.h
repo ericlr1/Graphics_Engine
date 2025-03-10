@@ -1,8 +1,8 @@
-#pragma once
+#ifndef C_BUFFER_MANAGMENT
+#define C_BUFFER_MANAGMENT
 
+#include "platform.h"
 #include <glad/glad.h>
-#include <cstdint>
-#include <glm/glm.hpp>
 
 #ifdef NDEBUG
 #define ASSERT(condition, message) ((void)0)
@@ -17,17 +17,13 @@
         } while(0)
 #endif
 
-// Definir tipos para evitar errores de 'u32' no declarado
-using u32 = uint32_t;
-using u8 = uint8_t;
-
 // Declaración anticipada de "Buffer" si es necesario en otros headers
 struct Buffer {
     GLuint handle;
     u32 size;
     GLenum type;
     u8* data;
-    u32 head;
+    u64 head;
 };
 
 // Declaraciones de funciones
@@ -51,3 +47,5 @@ void PushAlignedData(Buffer& buffer, const void* data, u32 size, u32 alignment);
 #define PushVec4(buffer, value) PushAlignedData(buffer, glm::value_ptr(value), sizeof(glm::vec4), sizeof(glm::vec4))
 #define PushMat3(buffer, value) PushAlignedData(buffer, glm::value_ptr(value), sizeof(glm::mat3), sizeof(glm::vec4))
 #define PushMat4(buffer, value) PushAlignedData(buffer, glm::value_ptr(value), sizeof(glm::mat4), sizeof(glm::vec4))
+
+#endif //C_BUFFER_MANAGMENT

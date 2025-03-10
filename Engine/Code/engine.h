@@ -6,6 +6,7 @@
 
 #include "platform.h"
 #include <glad/glad.h>
+#include "buffer_managment.h"
 
 typedef glm::vec2  vec2;
 typedef glm::vec3  vec3;
