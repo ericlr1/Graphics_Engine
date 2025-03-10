@@ -83,6 +83,9 @@ struct App
 
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;
+
+    //Vector ith all the OpenGL extensions
+    std::vector<std::string> glExtensions;
 };
 
 void Init(App* app);

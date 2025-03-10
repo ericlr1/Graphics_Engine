@@ -187,6 +187,16 @@ void Init(App* app)
     // - programs (and retrieve uniform indices)
     // - textures
 
+    //Get OpenGL extensions
+    GLint numExtensions = 0;
+    glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+    app->glExtensions.reserve(numExtensions);
+    for (GLint i = 0; i < numExtensions; ++i)
+    {
+        const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);
+        app->glExtensions.emplace_back(extension);
+    }
+
     struct VertexV3V2
     {
         glm::vec3 pos;
@@ -258,19 +268,17 @@ void Gui(App* app)
     ImGui::Text("OpenGL vendor: %s", (const char*)glGetString(GL_VENDOR));
     ImGui::Text("OpenGL GLSL version: %s", (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    // Display extensions in a scrollable child window
     ImGui::Separator();
     ImGui::Text("OpenGL Extensions:");
     ImGui::BeginChild("Extensions", ImVec2(0, 100), false, ImGuiWindowFlags_HorizontalScrollbar);
-    GLint num_extensions = 0;
-    glGetIntegerv(GL_NUM_EXTENSIONS, &num_extensions);
-    for (GLint i = 0; i < num_extensions; ++i)
-    {
-        const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);
-        ImGui::Text("%s", extension);
-    }
-    ImGui::EndChild();
 
+    // Use cached list
+    for (const auto& ext : app->glExtensions)
+    {
+        ImGui::Text("%s", ext.c_str());
+    }
+
+    ImGui::EndChild();
     ImGui::End();
 }
 

@@ -1,4 +1,5 @@
-﻿  platform.cpp
+﻿  engine.cpp
+  platform.cpp
 C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.cpp(42,36): warning C4244: '=': conversión de 'double' a 'T'; posible pérdida de datos
           with
           [
@@ -19,4 +20,5 @@ C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.cpp(45,29
           [
               T=float
           ]
+  Generando código...
   Engine.vcxproj -> C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\x64\Debug\Engine.exe
