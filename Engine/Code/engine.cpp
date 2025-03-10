@@ -204,10 +204,10 @@ void Init(App* app)
     };
 
     const VertexV3V2 vertices[] = {
-        { glm::vec3(-0.5, -0.5, 0.0), glm::vec2(0.0, 0.0)}, //Bottom-left
-        { glm::vec3(0.5, -0.5, 0.0), glm::vec2(1.0, 0.0)}, //Bottom-right
-        { glm::vec3(0.5, 0.5, 0.0), glm::vec2(1.0, 1.0)}, //Top-right
-        { glm::vec3(-0.5, 0.5, 0.0), glm::vec2(0.0, 1.0)}, //Top-left
+        { glm::vec3(-1.0, -1.0, 0.0), glm::vec2(0.0, 0.0)}, //Bottom-left
+        { glm::vec3(1.0, -1.0, 0.0), glm::vec2(1.0, 0.0)}, //Bottom-right
+        { glm::vec3(1.0, 1.0, 0.0), glm::vec2(1.0, 1.0)}, //Top-right
+        { glm::vec3(-1.0, 1.0, 0.0), glm::vec2(0.0, 1.0)}, //Top-left
     };
 
     const u16 indices[] = {
@@ -294,35 +294,31 @@ void Render(App* app)
         case Mode_TexturedQuad:
             {
                 // TODO: Draw your textured quad here!
-                // - clear the framebuffer
-                
-                // - set the viewport
-                
-                // - set the blending state
-                // - bind the texture into unit 0
-                // - bind the program 
-                //   (...and make its texture sample from unit 0)
-                // - bind the vao
-                // - glDrawElements() !!!
 
-                
-                glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+                // Clear the framebuffer
+                glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+                // Set the viewport
                 glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
+                //Bind the program
                 Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx]; 
                 glUseProgram(programTexturedGeometry.handle); 
+                //Bind the VAO
                 glBindVertexArray(app->vao);
 
+                //Set the blending state
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+                //Bind the texture into unit 0 (and make its texture sample from unit 0)
                 glUniform1i(app->programUniformTexture, 0); 
-                glActiveTexture(GL_TEXTURE);
-                GLuint textureHandle = app->textures[app->diceTexIdx].handle; 
+                glActiveTexture(GL_TEXTURE0);
+                GLuint textureHandle = app->textures[app->diceTexIdx].handle;
                 glBindTexture(GL_TEXTURE_2D, textureHandle);
 
+                //glDrawElements() -> De momento hardcoded a 6
                 glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
                 glBindVertexArray(0); 
