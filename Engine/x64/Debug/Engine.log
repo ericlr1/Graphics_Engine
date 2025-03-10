@@ -1,2 +1,22 @@
-﻿  engine.cpp
-  Engine.vcxproj -> C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\x64\Debug\Engine.exe
+﻿  platform.cpp
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.cpp(42,36): warning C4244: '=': conversión de 'double' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.cpp(43,36): warning C4244: '=': conversión de 'double' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.cpp(44,29): warning C4244: '=': conversión de 'double' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.cpp(45,29): warning C4244: '=': conversión de 'double' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+  Engine.vcxproj -> C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\x64\Debug\Engine.exe
