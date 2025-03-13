@@ -324,7 +324,7 @@ String MakeString(const char *cstr)
     return str;
 }
 
-String MakePath(String dir, std::string filename)
+String MakePath(String dir, String filename)
 {
     String str = {};
     str.len = dir.len + filename.len + 1;
