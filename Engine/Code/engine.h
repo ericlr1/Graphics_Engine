@@ -5,8 +5,9 @@
 #pragma once
 
 #include "platform.h"
-#include <glad/glad.h>
 #include "buffer_managment.h"
+#include "assimp_model_loading.h"
+#include <glad/glad.h>
 
 typedef glm::vec2  vec2;
 typedef glm::vec3  vec3;
@@ -29,12 +30,22 @@ struct Texture
     std::string filepath;
 };
 
+struct VertexShaderAttribute {
+    u8 location;
+    u8 componentCount;
+};
+
+struct VertexShaderLayout {
+    std::vector<VertexShaderAttribute> attributes;
+};
+
 struct Program
 {
     GLuint             handle;
     std::string        filepath;
     std::string        programName;
     u64                lastWriteTimestamp; // What is this for?
+    VertexShaderLayout vertexInputLayout;
 };
 
 enum Mode
@@ -59,6 +70,9 @@ struct App
     ivec2 displaySize;
 
     std::vector<Texture>  textures;
+    std::vector<Material>  materials;
+    std::vector<Mesh>  meshes;
+    std::vector<Model>  models;
     std::vector<Program>  programs;
 
     // program indices

@@ -2,6 +2,7 @@
 #define ASSIMP_MODEL_LOADER_H
 
 #include "platform.h"
+#include "engine.h"
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -22,6 +23,8 @@ struct Material;
 struct Model;
 struct VertexBufferLayout;
 struct VertexBufferAttribute;
+struct VertexShaderLayout;
+struct VertexShaderAttribute;
 struct Submesh;
 struct String;
 
@@ -38,15 +41,21 @@ u32 LoadTexture2D(App* app, const char* filepath);
 
 // Structures
 struct VertexBufferAttribute {
-    u32 location;
-    u32 componentCount;
-    u32 offset;
+    u8 location;
+    u8 componentCount;
+    u8 offset;
 };
 
 struct VertexBufferLayout {
     std::vector<VertexBufferAttribute> attributes;
-    u32 stride;
+    u8 stride;
 };
+
+struct Model {
+    u32 meshIdx;
+    std::vector<u32> materialIdx;
+};
+
 
 struct Submesh {
     VertexBufferLayout vertexBufferLayout;
@@ -54,6 +63,8 @@ struct Submesh {
     std::vector<u32> indices;
     u32 vertexOffset;
     u32 indexOffset;
+
+    //std::vector<Vao> vaos;
 };
 
 struct Mesh {
@@ -66,7 +77,7 @@ struct Material {
     std::string name;
     glm::vec3 albedo;
     glm::vec3 emissive;
-    float smoothness;
+    f32 smoothness;
     u32 albedoTextureIdx;
     u32 emissiveTextureIdx;
     u32 specularTextureIdx;
@@ -74,15 +85,5 @@ struct Material {
     u32 bumpTextureIdx;
 };
 
-struct Model {
-    u32 meshIdx;
-    std::vector<u32> materialIdx;
-};
-
-struct App {
-    std::vector<Mesh> meshes;
-    std::vector<Material> materials;
-    std::vector<Model> models;
-};
 
 #endif // ASSIMP_MODEL_LOADER_H

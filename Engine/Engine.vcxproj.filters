@@ -109,7 +109,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="WorkingDir\shaders.glsl">
+    <None Include="WorkingDir\RENDER_QUAD.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="WorkingDir\RENDER_GEOMETRY.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
