@@ -1,7 +1,7 @@
 #ifndef C_BUFFER_MANAGMENT
 #define C_BUFFER_MANAGMENT
 
-#include "platform.h"
+#include "Structs.hpp"
 #include <glad/glad.h>
 
 #ifdef NDEBUG
@@ -17,14 +17,6 @@
         } while(0)
 #endif
 
-// Declaración anticipada de "Buffer" si es necesario en otros headers
-struct Buffer {
-    GLuint handle;
-    u32 size;
-    GLenum type;
-    u8* data;
-    u64 head;
-};
 
 // Declaraciones de funciones
 bool IsPowerOf2(u32 value);

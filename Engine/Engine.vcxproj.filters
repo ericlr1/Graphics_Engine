@@ -107,6 +107,9 @@
     <ClInclude Include="Code\assimp_model_loading.h">
       <Filter>Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Structs.hpp">
+      <Filter>Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="WorkingDir\RENDER_QUAD.glsl">
