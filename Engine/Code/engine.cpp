@@ -11,6 +11,19 @@
 #include <imgui.h>
 #include <stb_image.h>
 #include <stb_image_write.h>
+#include "buffer_managment.h"
+
+glm::mat4 TransformScale(const vec3& scaleFactor)
+{
+    return glm::scale(scaleFactor);
+}
+
+glm::mat4 TransformPositionScale(const vec3& pos, const vec3& scaleFactor)
+{
+    glm::mat4 transform = glm::translate(pos);
+    transform = glm::scale(transform, scaleFactor);
+    return transform;
+}
 
 GLuint CreateProgramFromSource(String programSource, const char* shaderName)
 {
@@ -285,6 +298,17 @@ void Init(App* app)
 
     app->patrickTextureUniform = glGetUniformLocation(app->programs[app->geometryProgramIdx].handle, "uTexture");
 
+    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
+    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
+
+    app->localParamsUBO = CreateConstantBuffer(app->maxUniformBufferSize);
+
+    MapBuffer(app->localParamsUBO, GL_WRITE_ONLY);
+    //TODO Lunes
+    PushMat4(app->localParamsUBO, app->worldCamera.viweMatrix);
+    PushMat4(app->localParamsUBO, app->worldCamera.projectionMatrix);
+    UnmapBuffer(app->localParamsUBO);
+
     app->mode = Mode_Forward_Geometry;
 }
 
@@ -363,6 +387,13 @@ void Render(App* app)
         break;
         case Mode_Forward_Geometry:
         {
+            //WIP - Camera setup
+            float aspectRatio = (float)app->displaySize.x / (float)app->displaySize.y;
+            float znear = 0.1f;
+            float zfar = 1000.0f;
+            glm::mat4 projection = glm::perspective(glm::radians(60.0f), aspectRatio, znear, zfar);
+            glm::mat4 view = glm::lookAt(vec3(-5, 3, 0), vec3(0,0,0), vec3(0,1,0));
+
             // Clear the framebuffer
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

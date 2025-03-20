@@ -12,6 +12,12 @@ typedef glm::ivec2 ivec2;
 typedef glm::ivec3 ivec3;
 typedef glm::ivec4 ivec4;
 
+struct Camera 
+{
+    glm::mat4 viweMatrix;
+    glm::mat4 projectionMatrix;
+};
+
 // Declaración anticipada de "Buffer" si es necesario en otros headers
 struct Buffer {
     GLuint handle;
@@ -164,6 +170,12 @@ struct App
 
     //Vector ith all the OpenGL extensions
     std::vector<std::string> glExtensions;
+
+    Camera worldCamera;
+    GLint maxUniformBufferSize;
+    GLint uniformBlockAlignment;
+
+    Buffer localParamsUBO;
 };
 
 #endif // STRUCTS
