@@ -11,9 +11,19 @@ layout(location=2) in vec2 aTexCoord;
 layout(location=3) in vec3 aTangent;
 layout(location=4) in vec3 aBitangent;
 
+struct Light
+{
+	unsigned int type;
+	vec3 color;
+	vec3 direction;
+	vec3 position;
+};
+
 layout(binding=0, std140) uniform GlobalParams
 {
-	vec3 CameraPosition;
+	vec3 uCameraPosition;
+	unsigned int uLoghtCount;
+	Light uLight[16];
 };
 
 layout(binding=1, std140) uniform LocalParams
@@ -25,13 +35,14 @@ layout(binding=1, std140) uniform LocalParams
 out vec2 vTexCoord;
 out vec3 vPosition;
 out vec3 vNormal;
-//out vec3 vViewDir;
+out vec3 vViewDir;
 
 void main()
 {
 	vTexCoord = aTexCoord;
 	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
 	vNormal = vec3(uWorldMatrix * vec4(aNormal, 0.0));
+	vViewDir = uCameraPosition - vPosition;
 	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
 }
 
