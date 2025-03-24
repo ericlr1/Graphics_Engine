@@ -48,17 +48,33 @@ void main()
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
 
+struct Light
+{
+	unsigned int type;
+	vec3 color;
+	vec3 direction;
+	vec3 position;
+};
+
+layout(binding=0, std140) uniform GlobalParams
+{
+	vec3 uCameraPosition;
+	unsigned int uLoghtCount;
+	Light uLight[16];
+};
+
 in vec2 vTexCoord;
 in vec3 vPosition;
 in vec3 vNormal;
 //in vec3 vViewDir;
+
 
 uniform sampler2D uTexture;
 layout(location=0) out vec4 oColor;
 
 void main()
 {
-	oColor = texture(uTexture, vTexCoord);
+	oColor = vec4(uLight[0].color, 1.0);
 }
 
 #endif

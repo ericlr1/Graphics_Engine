@@ -314,11 +314,27 @@ void Init(App* app)
     app->entityUBO = CreateConstantBuffer(app->maxUniformBufferSize);
 
     
-
+    //Lueces - entre otras cosas
+    app->lights.push_back({ LightType::Light_Directional, vec3(1.0, 0.0, 1.0), vec3(1.0, 0.0, 0.0), vec3(0.0) });
     MapBuffer(app->globalUBO, GL_WRITE_ONLY);
-    PushVec3(app->globalUBO, app->worldCamera.position);    
+    PushVec3(app->globalUBO, app->worldCamera.position);   
+
+    PushUInt(app->globalUBO, app->lights.size());
+
+    for (size_t i = 0; i < app->lights.size(); i++)
+    {
+        AlignHead(app->globalUBO, sizeof(vec4));
+        Light& light = app->lights[i];
+        PushUInt(app->globalUBO, static_cast<unsigned int>(light.type));
+        PushVec3(app->globalUBO, light.color);
+        PushVec3(app->globalUBO, light.direction);
+        PushVec3(app->globalUBO, light.position);
+    }
+
     UnmapBuffer(app->globalUBO);
 
+
+    //Entidades
     MapBuffer(app->entityUBO, GL_WRITE_ONLY);
 
     glm::mat4 VP = app->worldCamera.projectionMatrix * app->worldCamera.viewMatrix;

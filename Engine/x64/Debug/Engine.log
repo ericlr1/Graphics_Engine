@@ -1,6 +1,6 @@
 ﻿  engine.cpp
 C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(17,1): warning C4005: 'ASSERT': redefinición de macro
 C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.h(101): message : vea la definición anterior de 'ASSERT'
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(332,55): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(340,59): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(348,55): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(356,59): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
   Engine.vcxproj -> C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\x64\Debug\Engine.exe
