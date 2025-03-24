@@ -304,7 +304,7 @@ void Init(App* app)
     float znear = 0.1f;
     float zfar = 1000.0f;
     app->worldCamera.projectionMatrix = glm::perspective(glm::radians(60.0f), aspectRatio, znear, zfar);
-    app->worldCamera.position = vec3(0, 5, 10);
+    app->worldCamera.position = vec3(-2, 8, 25);
     app->worldCamera.viewMatrix = glm::lookAt(app->worldCamera.position, vec3(0, 2, 0), vec3(0, 1, 0));
 
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
@@ -331,7 +331,7 @@ void Init(App* app)
             AlignHead(app->entityUBO, app->uniformBlockAlignment);
             entity.entityBufferOffset = app->entityUBO.head;
 
-            entity.worldMatrix = glm::translate(glm::vec3(x, 0, z));
+            entity.worldMatrix = glm::translate(glm::vec3(x * 4, 0, z * 4));
             entity.modelIndex = app->patrickIdx;
 
             PushMat4(app->entityUBO, entity.worldMatrix);
