@@ -1,41 +1,6 @@
-﻿  assimp_model_loading.cpp
-  buffer_managment.cpp
+﻿  engine.cpp
 C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(17,1): warning C4005: 'ASSERT': redefinición de macro
 C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.h(101): message : vea la definición anterior de 'ASSERT'
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.cpp(52,31): warning C4244: 'argumento': conversión de 'u64' a 'u32'; posible pérdida de datos
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.cpp(64,1): warning C4005: 'PushUInt': redefinición de macro
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(37): message : vea la definición anterior de 'PushUInt'
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.cpp(65,1): warning C4005: 'PushVec3': redefinición de macro
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(38): message : vea la definición anterior de 'PushVec3'
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.cpp(66,1): warning C4005: 'PushVec4': redefinición de macro
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(39): message : vea la definición anterior de 'PushVec4'
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.cpp(67,1): warning C4005: 'PushMat3': redefinición de macro
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(40): message : vea la definición anterior de 'PushMat3'
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.cpp(68,1): warning C4005: 'PushMat4': redefinición de macro
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(41): message : vea la definición anterior de 'PushMat4'
-  engine.cpp
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(17,1): warning C4005: 'ASSERT': redefinición de macro
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.h(101): message : vea la definición anterior de 'ASSERT'
-  platform.cpp
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.cpp(41,36): warning C4244: '=': conversión de 'double' a 'T'; posible pérdida de datos
-          with
-          [
-              T=float
-          ]
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.cpp(42,36): warning C4244: '=': conversión de 'double' a 'T'; posible pérdida de datos
-          with
-          [
-              T=float
-          ]
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.cpp(43,29): warning C4244: '=': conversión de 'double' a 'T'; posible pérdida de datos
-          with
-          [
-              T=float
-          ]
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.cpp(44,29): warning C4244: '=': conversión de 'double' a 'T'; posible pérdida de datos
-          with
-          [
-              T=float
-          ]
-  Generando código...
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(332,55): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(340,59): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
   Engine.vcxproj -> C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\x64\Debug\Engine.exe

@@ -14,8 +14,9 @@ typedef glm::ivec4 ivec4;
 
 struct Camera 
 {
-    glm::mat4 viweMatrix;
+    glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
+    vec3 position;
 };
 
 // Declaración anticipada de "Buffer" si es necesario en otros headers
@@ -76,6 +77,14 @@ struct VertexBufferAttribute {
     u8 location;
     u8 componentCount;
     u8 offset;
+};
+
+struct Entity {
+    
+    glm::mat4 worldMatrix;
+    u32 modelIndex;
+    u32 entityBufferOffset;
+    u32 entityBufferSize;
 };
 
 struct VertexBufferLayout {
@@ -175,7 +184,10 @@ struct App
     GLint maxUniformBufferSize;
     GLint uniformBlockAlignment;
 
-    Buffer localParamsUBO;
+    Buffer entityUBO;
+    Buffer globalUBO;
+
+    std::vector<Entity> entities;
 };
 
 #endif // STRUCTS

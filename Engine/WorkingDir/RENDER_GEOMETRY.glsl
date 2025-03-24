@@ -11,11 +11,16 @@ layout(location=2) in vec2 aTexCoord;
 layout(location=3) in vec3 aTangent;
 layout(location=4) in vec3 aBitangent;
 
+layout(binding=0, std140) uniform GlobalParams
+{
+	vec3 CameraPosition;
+};
+
 layout(binding=1, std140) uniform LocalParams
 {
 	mat4 uWorldMatrix;
 	mat4 uWorldViewProjectionMatrix;
-}
+};
 
 out vec2 vTexCoord;
 out vec3 vPosition;

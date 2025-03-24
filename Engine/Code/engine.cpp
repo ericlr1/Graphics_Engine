@@ -221,6 +221,7 @@ void Init(App* app)
     // - programs (and retrieve uniform indices)
     // - textures
 
+
     //Get OpenGL extensions
     GLint numExtensions = 0;
     glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
@@ -298,16 +299,50 @@ void Init(App* app)
 
     app->patrickTextureUniform = glGetUniformLocation(app->programs[app->geometryProgramIdx].handle, "uTexture");
 
+    //WIP - Camera setup
+    float aspectRatio = (float)app->displaySize.x / (float)app->displaySize.y;
+    float znear = 0.1f;
+    float zfar = 1000.0f;
+    app->worldCamera.projectionMatrix = glm::perspective(glm::radians(60.0f), aspectRatio, znear, zfar);
+    app->worldCamera.position = vec3(0, 5, 10);
+    app->worldCamera.viewMatrix = glm::lookAt(app->worldCamera.position, vec3(0, 2, 0), vec3(0, 1, 0));
+
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
 
-    app->localParamsUBO = CreateConstantBuffer(app->maxUniformBufferSize);
+    app->globalUBO = CreateConstantBuffer(app->maxUniformBufferSize);
+    app->entityUBO = CreateConstantBuffer(app->maxUniformBufferSize);
 
-    MapBuffer(app->localParamsUBO, GL_WRITE_ONLY);
-    //TODO Lunes
-    PushMat4(app->localParamsUBO, app->worldCamera.viweMatrix);
-    PushMat4(app->localParamsUBO, app->worldCamera.projectionMatrix);
-    UnmapBuffer(app->localParamsUBO);
+    
+
+    MapBuffer(app->globalUBO, GL_WRITE_ONLY);
+    PushVec3(app->globalUBO, app->worldCamera.position);    
+    UnmapBuffer(app->globalUBO);
+
+    MapBuffer(app->entityUBO, GL_WRITE_ONLY);
+
+    glm::mat4 VP = app->worldCamera.projectionMatrix * app->worldCamera.viewMatrix;
+
+    for (int z = -2; z != 2; z++)
+    {
+        for (int x = -2; x != 2; x++)
+        {
+            Entity entity;
+            AlignHead(app->entityUBO, app->uniformBlockAlignment);
+            entity.entityBufferOffset = app->entityUBO.head;
+
+            entity.worldMatrix = glm::translate(glm::vec3(x, 0, z));
+            entity.modelIndex = app->patrickIdx;
+
+            PushMat4(app->entityUBO, entity.worldMatrix);
+            PushMat4(app->entityUBO, VP * entity.worldMatrix);
+
+            entity.entityBufferSize = app->entityUBO.head - entity.entityBufferOffset;
+            app->entities.push_back(entity);
+        }
+    }
+
+    UnmapBuffer(app->entityUBO);
 
     app->mode = Mode_Forward_Geometry;
 }
@@ -387,12 +422,7 @@ void Render(App* app)
         break;
         case Mode_Forward_Geometry:
         {
-            //WIP - Camera setup
-            float aspectRatio = (float)app->displaySize.x / (float)app->displaySize.y;
-            float znear = 0.1f;
-            float zfar = 1000.0f;
-            glm::mat4 projection = glm::perspective(glm::radians(60.0f), aspectRatio, znear, zfar);
-            glm::mat4 view = glm::lookAt(vec3(-5, 3, 0), vec3(0,0,0), vec3(0,1,0));
+
 
             // Clear the framebuffer
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -404,25 +434,32 @@ void Render(App* app)
             Program& geometryProgram = app->programs[app->geometryProgramIdx];
             glUseProgram(geometryProgram.handle);
 
-            Model& model = app->models[app->patrickIdx];
-            Mesh& mesh = app->meshes[model.meshIdx];
+            glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->globalUBO.handle, 0, app->globalUBO.size);
 
-            for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+            for (const auto& entity : app->entities)
             {
-                GLuint vao = FindVAO(mesh, i, geometryProgram);
+                glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->entityUBO.handle, entity.entityBufferOffset, entity.entityBufferSize);
+                Model& model = app->models[app->patrickIdx];
+                Mesh& mesh = app->meshes[model.meshIdx];
 
-                glBindVertexArray(vao);
+                for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+                {
+                    GLuint vao = FindVAO(mesh, i, geometryProgram);
 
-                u32 submeshMaterialIdx = model.materialIdx[i];
-                Material& submeshMaterial = app->materials[submeshMaterialIdx];
+                    glBindVertexArray(vao);
 
-                glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
-                glUniform1i(app->patrickTextureUniform, 0);
+                    u32 submeshMaterialIdx = model.materialIdx[i];
+                    Material& submeshMaterial = app->materials[submeshMaterialIdx];
 
-                Submesh& submesh = mesh.submeshes[i];
-                glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
+                    glUniform1i(app->patrickTextureUniform, 0);
+
+                    Submesh& submesh = mesh.submeshes[i];
+                    glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+                }
             }
+
         }
         break;
 
@@ -526,5 +563,5 @@ GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program)
     Vao vao = { vaoHandle, program.handle };
     submesh.vaos.push_back(vao);
     
-    return GLuint();
+    return vaoHandle;
 }
