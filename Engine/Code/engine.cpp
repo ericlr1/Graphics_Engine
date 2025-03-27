@@ -212,6 +212,26 @@ u32 LoadTexture2D(App* app, const char* filepath)
     }
 }
 
+void UpdateLights(App* app)
+{
+    MapBuffer(app->globalUBO, GL_WRITE_ONLY);
+    PushVec3(app->globalUBO, app->worldCamera.position);
+
+    PushUInt(app->globalUBO, app->lights.size());
+
+    for (size_t i = 0; i < app->lights.size(); i++)
+    {
+        AlignHead(app->globalUBO, sizeof(vec4));
+        Light& light = app->lights[i];
+        PushUInt(app->globalUBO, static_cast<unsigned int>(light.type));
+        PushVec3(app->globalUBO, light.color);
+        PushVec3(app->globalUBO, light.direction);
+        PushVec3(app->globalUBO, light.position);
+    }
+
+    UnmapBuffer(app->globalUBO);
+}
+
 void Init(App* app)
 {
     // TODO: Initialize your resources here!
@@ -315,23 +335,10 @@ void Init(App* app)
 
     
     //Lueces - entre otras cosas
-    app->lights.push_back({ LightType::Light_Directional, vec3(1.0, 0.0, 1.0), vec3(1.0, 0.0, 0.0), vec3(0.0) });
-    MapBuffer(app->globalUBO, GL_WRITE_ONLY);
-    PushVec3(app->globalUBO, app->worldCamera.position);   
+    app->lights.push_back({ LightType::Light_Directional, vec3(0.0, 0.0, 0.2), vec3(1.0, 0.0, 0.0), vec3(0.0) });
+    app->lights.push_back({ LightType::Light_Point, vec3(0.0, 0.0, 1.0), vec3(-1.0, 0.0, 0.0), vec3(0.0, 75.0, 0.0) });
 
-    PushUInt(app->globalUBO, app->lights.size());
-
-    for (size_t i = 0; i < app->lights.size(); i++)
-    {
-        AlignHead(app->globalUBO, sizeof(vec4));
-        Light& light = app->lights[i];
-        PushUInt(app->globalUBO, static_cast<unsigned int>(light.type));
-        PushVec3(app->globalUBO, light.color);
-        PushVec3(app->globalUBO, light.direction);
-        PushVec3(app->globalUBO, light.position);
-    }
-
-    UnmapBuffer(app->globalUBO);
+    UpdateLights(app);
 
 
     //Entidades
@@ -375,6 +382,50 @@ void Gui(App* app)
     ImGui::Text("OpenGL renderer: %s", (const char*)glGetString(GL_RENDERER));
     ImGui::Text("OpenGL vendor: %s", (const char*)glGetString(GL_VENDOR));
     ImGui::Text("OpenGL GLSL version: %s", (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    ImGui::Separator();
+    bool lightChanged = false;
+    ImGui::Text("===== Lights Setup =====");
+    for (auto& light : app->lights)
+    {
+        vec3 checkVector;
+
+        ImGui::PushID(&light);
+        float color[3] = { light.color.x, light.color.y, light.color.z };
+        ImGui::DragFloat3("Color", color, 0.01, 0.0, 1.0);
+        checkVector = vec3(color[0], color[1], color[2]);
+        if (checkVector != light.color)
+        {
+            light.color = checkVector;
+            lightChanged = true;
+        }
+
+        float dir[3] = { light.direction.x, light.direction.y, light.direction.z };
+        ImGui::DragFloat3("Direction", dir, 0.01, -1.0, 1.0);
+        checkVector = vec3(dir[0], dir[1], dir[2]);
+        if (checkVector != light.direction)
+        {
+            light.direction = checkVector;
+            lightChanged = true;
+        }
+
+        float position[3] = { light.position.x, light.position.y, light.position.z };
+        ImGui::DragFloat3("Position", position);
+        checkVector = vec3(position[0], position[1], position[2]);
+        if (checkVector != light.position)
+        {
+            light.position = checkVector;
+            lightChanged = true;
+        }
+
+        ImGui::PopID();
+        ImGui::Separator();
+    }
+
+    if (lightChanged)
+    {
+        UpdateLights(app);
+    }
 
     ImGui::Separator();
     ImGui::Text("OpenGL Extensions:");
