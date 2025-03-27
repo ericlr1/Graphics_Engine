@@ -28,6 +28,13 @@ struct Buffer {
     u64 head;
 };
 
+struct FrameBuffer {
+    GLuint handle;
+    vec2 buffersSize;
+    std::vector<std::pair<GLenum, GLuint>> attachments;
+    GLuint depthHandle;
+};
+
 struct Image
 {
     void* pixels;

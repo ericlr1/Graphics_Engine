@@ -5,26 +5,4 @@ C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(355,55)
 C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(363,59): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
 C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(395,57): warning C4305: 'argumento': truncamiento de 'double' a 'float'
 C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(404,60): warning C4305: 'argumento': truncamiento de 'double' a 'float'
-  platform.cpp
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.cpp(41,36): warning C4244: '=': conversión de 'double' a 'T'; posible pérdida de datos
-          with
-          [
-              T=float
-          ]
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.cpp(42,36): warning C4244: '=': conversión de 'double' a 'T'; posible pérdida de datos
-          with
-          [
-              T=float
-          ]
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.cpp(43,29): warning C4244: '=': conversión de 'double' a 'T'; posible pérdida de datos
-          with
-          [
-              T=float
-          ]
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.cpp(44,29): warning C4244: '=': conversión de 'double' a 'T'; posible pérdida de datos
-          with
-          [
-              T=float
-          ]
-  Generando código...
   Engine.vcxproj -> C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\x64\Debug\Engine.exe
