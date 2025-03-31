@@ -4,6 +4,7 @@
 
 #include "platform.h"
 #include <glad/glad.h>
+#include <stdexcept>
 
 typedef glm::vec2  vec2;
 typedef glm::vec3  vec3;
@@ -26,13 +27,6 @@ struct Buffer {
     GLenum type;
     u8* data;
     u64 head;
-};
-
-struct FrameBuffer {
-    GLuint handle;
-    vec2 buffersSize;
-    std::vector<std::pair<GLenum, GLuint>> attachments;
-    GLuint depthHandle;
 };
 
 struct Image
@@ -149,6 +143,80 @@ struct Light
     vec3 position;
 };
 
+struct FrameBuffer {
+
+    GLuint handle;
+    vec2 buffersSize;
+    std::vector<std::pair<GLenum, GLuint>> attachments;
+    GLuint depthHandle;
+
+    bool CreateFBO(const uint64_t aAttachments, const uint64_t aWidth, const uint64_t aHeight)
+    {
+        if (aAttachments > GL_MAX_COLOR_ATTACHMENTS)
+        {
+            return false;
+        }
+
+        std::vector<GLuint> textures;
+
+        for (size_t i = 0; i < aAttachments; ++i)
+        {
+            GLuint colorAttachments;
+            glGenTextures(1, &colorAttachments);
+            glBindTexture(GL_TEXTURE_2D, colorAttachments);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, aWidth, aHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            attachments.push_back({ GL_COLOR_ATTACHMENT0 + i, colorAttachments });
+            textures.push_back(colorAttachments);
+        }
+
+        glGenTextures(1, &depthHandle);
+        glBindTexture(GL_TEXTURE_2D, depthHandle);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, aWidth, aHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glGenFramebuffers(1, &handle);
+        glBindFramebuffer(GL_FRAMEBUFFER, handle);
+        for (auto it = attachments.cbegin(); it != attachments.cend(); ++it)
+        {
+            glFramebufferTexture(GL_FRAMEBUFFER, it->first, it->second, 0);
+        }
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthHandle, 0);
+
+        GLenum frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (frameBufferStatus != GL_FRAMEBUFFER_COMPLETE)
+        {
+            throw std::runtime_error("Framebuffer creation error!");
+        }
+
+        glDrawBuffers(textures.size(), textures.data());    //TODO: Fix this error
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    }
+
+    void Clean()
+    {
+        glDeleteFramebuffers(1, &handle);   
+        for (auto& texture : attachments)
+        {
+            glDeleteTextures(1, &texture.second);
+            texture.second = 0;
+        }
+        glDeleteTextures(1, &depthHandle);
+        depthHandle = 0;
+    }
+};
+
 struct App
 {
     // Loop
@@ -210,6 +278,8 @@ struct App
 
     std::vector<Entity> entities;
     std::vector<Light> lights;
+
+    FrameBuffer primaryFBO;
 };
 
 #endif // STRUCTS

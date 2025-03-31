@@ -232,6 +232,46 @@ void UpdateLights(App* app)
     UnmapBuffer(app->globalUBO);
 }
 
+void RenderScreenFillQuad(App* app, const FrameBuffer& aFBO)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // Clear the framebuffer
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Set the viewport
+    glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+
+    //Bind the program
+    Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx];
+    glUseProgram(programTexturedGeometry.handle);
+
+    //Bind the VAO
+    glBindVertexArray(app->vao);
+
+    //Set the blending state
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    size_t iteration = 0;
+    const char* uniformNames[] = {"uAlbedo"};   //TODO: Poner aqui el resto de los nombres del shader
+    for (const auto& texture : aFBO.attachments)
+    {
+        //Bind the textures
+        glUniform1i(glGetUniformLocation(programTexturedGeometry.handle, uniformNames[iteration]), 0);
+        glActiveTexture(GL_TEXTURE0 + iteration);
+        glBindTexture(GL_TEXTURE_2D, texture.second);
+
+        ++iteration;
+    }
+
+    //glDrawElements() -> De momento hardcoded a 6
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+    glBindVertexArray(0);
+    glUseProgram(0);
+}
+
 void Init(App* app)
 {
     // TODO: Initialize your resources here!
@@ -369,33 +409,7 @@ void Init(App* app)
 
     app->mode = Mode_Forward_Geometry;
 
-    for (size_t i = 0; i < 1; i++)
-    {
-        GLuint colorAttachments;
-        glGenTextures(1, &colorAttachments);
-        glBindTexture(GL_TEXTURE_2D, colorAttachments);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        //TODO: app.primaryFBO.push_back();
-    }
-
-    GLuint depthAttachment;
-    glGenTextures(1, &depthAttachment);
-    glBindTexture(GL_TEXTURE_2D, depthAttachment);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, app->displaySize.x, app->displaySize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    //TODO: app.primaryFBO.depthHandle = depthAttachment;
-
+    app->primaryFBO.CreateFBO(3, app->displaySize.x, app->displaySize.y);
 
 }
 
@@ -524,6 +538,9 @@ void Render(App* app)
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            //TODO
+            //glBindFramebuffer(GL_FRAMEBUFFER, );
+
             // Set the viewport
             glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
@@ -607,6 +624,8 @@ void CleanUp(App* app)
         glDeleteBuffers(1, &app->embeddedVertices);
         app->embeddedVertices = 0;
     }
+
+    app->primaryFBO.Clean();
 }
 
 GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program)
