@@ -157,7 +157,7 @@ struct FrameBuffer {
             return false;
         }
 
-        std::vector<GLuint> textures;
+        std::vector<GLenum> enums;
 
         for (size_t i = 0; i < aAttachments; ++i)
         {
@@ -172,12 +172,12 @@ struct FrameBuffer {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             glBindTexture(GL_TEXTURE_2D, 0);
             attachments.push_back({ GL_COLOR_ATTACHMENT0 + i, colorAttachments });
-            textures.push_back(colorAttachments);
+            enums.push_back(GL_COLOR_ATTACHMENT0 + i);
         }
 
         glGenTextures(1, &depthHandle);
         glBindTexture(GL_TEXTURE_2D, depthHandle);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, aWidth, aHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, aWidth, aHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -199,7 +199,7 @@ struct FrameBuffer {
             throw std::runtime_error("Framebuffer creation error!");
         }
 
-        glDrawBuffers(textures.size(), textures.data());    //TODO: Fix this error
+        glDrawBuffers(enums.size(), enums.data());
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     }

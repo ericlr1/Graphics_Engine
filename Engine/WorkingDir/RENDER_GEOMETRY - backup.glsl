@@ -1,19 +1,49 @@
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-#ifdef RENDER_QUAD
+#ifdef RENDER_GEOMETRY
 
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
 layout(location=0) in vec3 aPosition;
-layout(location=1) in vec2 aTexCoord;
+layout(location=1) in vec3 aNormal;
+layout(location=2) in vec2 aTexCoord;
+layout(location=3) in vec3 aTangent;
+layout(location=4) in vec3 aBitangent;
+
+struct Light
+{
+	unsigned int type;
+	vec3 color;
+	vec3 direction;
+	vec3 position;
+};
+
+layout(binding=0, std140) uniform GlobalParams
+{
+	vec3 uCameraPosition;
+	unsigned int uLightCount;
+	Light uLight[16];
+};
+
+layout(binding=1, std140) uniform LocalParams
+{
+	mat4 uWorldMatrix;
+	mat4 uWorldViewProjectionMatrix;
+};
 
 out vec2 vTexCoord;
+out vec3 vPosition;
+out vec3 vNormal;
+out vec3 vViewDir;
 
 void main()
 {
 	vTexCoord = aTexCoord;
-	gl_Position = vec4(aPosition, 1.0);
+	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
+	vNormal = vec3(uWorldMatrix * vec4(aNormal, 0.0));
+	vViewDir = uCameraPosition - vPosition;
+	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
 }
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
@@ -34,13 +64,16 @@ layout(binding=0, std140) uniform GlobalParams
 };
 
 in vec2 vTexCoord;
+in vec3 vPosition;
+in vec3 vNormal;
+in vec3 vViewDir;
 
-uniform sampler2D uAlbedo;
-uniform sampler2D uNormals;
-uniform sampler2D uPosition;
-uniform sampler2D uViewDir;
 
-layout(location=0) out vec4 oColor;
+uniform sampler2D uTexture;
+layout(location=0) out vec4 oAlbedo;
+layout(location=1) out vec4 oNormals;
+layout(location=2) out vec4 oPosition;
+layout(location=3) out vec4 oViewDir;
 
 vec3 CalcPointLight(Light aLight, vec3 aNormal, vec3 aPosition, vec3 aViewDir)
 {
@@ -81,31 +114,32 @@ vec3 CalcDirLight(Light aLight, vec3 aNormal, vec3 aViewDir)
 
 void main()
 {
-	vec3 Albedo = texture(uAlbedo, vTexCoord).xyz;
-	vec3 Normal = texture(uNormals, vTexCoord).xyz;
-	vec3 ViewDir = texture(uViewDir, vTexCoord).xyz;
-	vec3 Position = texture(uPosition, vTexCoord).xyz;
-
-
 	vec3 returnColor = vec3(0.0);
 
 	for(int i = 0; i < uLightCount; ++i)
 	{
-		vec3 lightResult = vec3(0.0);
 		if(uLight[i].type == 0)
 		{
-			returnColor += CalcDirLight(uLight[i], Normal, ViewDir);
+			returnColor += CalcDirLight(uLight[i], vNormal, vViewDir);
 		}
 		else if(uLight[i].type == 1)
 		{
-			returnColor += CalcPointLight(uLight[i], Normal, Position, ViewDir);
+			returnColor += CalcPointLight(uLight[i], vNormal, vPosition, vViewDir);
 		}
-		//returnColor.rgb += lightResult * Albedo.rgb;
 		
 	}
 
-	oColor = vec4(returnColor * Albedo.rgb, 1.0);
+	oAlbedo = texture(uTexture, vTexCoord);
+	oNormals = vec4(vNormal, 0.0);
+	oPosition = vec4(vPosition, 0.0);
+	oViewDir = vec4(vViewDir, 0.0);
 }
 
 #endif
 #endif
+
+
+// NOTE: You can write several shaders in the same file if you want as
+// long as you embrace them within an #ifdef block (as you can see above).
+// The third parameter of the LoadProgram function in engine.cpp allows
+// chosing the shader you want to load by name.

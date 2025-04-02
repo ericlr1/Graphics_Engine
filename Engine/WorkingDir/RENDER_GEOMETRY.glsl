@@ -48,21 +48,6 @@ void main()
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
 
-struct Light
-{
-	unsigned int type;
-	vec3 color;
-	vec3 direction;
-	vec3 position;
-};
-
-layout(binding=0, std140) uniform GlobalParams
-{
-	vec3 uCameraPosition;
-	unsigned int uLightCount;
-	Light uLight[16];
-};
-
 in vec2 vTexCoord;
 in vec3 vPosition;
 in vec3 vNormal;
@@ -70,63 +55,17 @@ in vec3 vViewDir;
 
 
 uniform sampler2D uTexture;
-layout(location=0) out vec4 oColor;
-
-vec3 CalcPointLight(Light aLight, vec3 aNormal, vec3 aPosition, vec3 aViewDir)
-{
-	vec3 lightDir = normalize(aLight.position - aPosition);
-	float diff = max(dot(aNormal, lightDir), 0.0);
-	vec3 reflectDir = reflect(-lightDir, aNormal);
-	float spec = pow(max(dot(aViewDir, reflectDir), 0.0), 2.0);
-
-	float distance = length(aLight.position - aPosition);
-
-	float constant = 1.0;
-	float linear = 0.09;
-	float quadratic = 0.032;
-	float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
-
-	vec3 ambient = aLight.color * 0.2;
-	vec3 diffuse = aLight.color * diff;
-	vec3 specular = aLight.color * spec;
-	ambient *= attenuation;
-	diffuse *= attenuation;
-	specular *= attenuation;
-	return (ambient + diffuse + specular);
-}
-
-//TODO: Copiar la del profe
-vec3 CalcDirLight(Light aLight, vec3 aNormal, vec3 aPosition, vec3 aViewDir)
-{
-    vec3 lightDir = normalize(-aLight.direction);
-    float diff = max(dot(aNormal, lightDir), 0.0);
-    vec3 reflectDir = reflect(-lightDir, aNormal);
-    float spec = pow(max(dot(aViewDir, reflectDir), 0.0), 32.0);
-    
-    vec3 ambient = aLight.color * 0.2;
-    vec3 diffuse = aLight.color * diff;
-    vec3 specular = aLight.color * spec;
-    return (ambient + diffuse + specular);
-}
+layout(location=0) out vec4 oAlbedo;
+layout(location=1) out vec4 oNormals;
+layout(location=2) out vec4 oPosition;
+layout(location=3) out vec4 oViewDir;
 
 void main()
 {
-	vec3 returnColor = vec3(0.0);
-
-	for(int i = 0; i < uLightCount; ++i)
-	{
-		if(uLight[i].type == 0)
-		{
-			returnColor += CalcDirLight(uLight[i], vNormal, vPosition, vViewDir);
-		}
-		else if(uLight[i].type == 1)
-		{
-			returnColor += CalcPointLight(uLight[i], vNormal, vPosition, vViewDir);
-		}
-		
-	}
-
-	oColor = vec4(returnColor, 1.0);
+	oAlbedo = texture(uTexture, vTexCoord);
+	oNormals = vec4(vNormal, 0.0);
+	oPosition = vec4(vPosition, 0.0);
+	oViewDir = vec4(vViewDir, 0.0);
 }
 
 #endif

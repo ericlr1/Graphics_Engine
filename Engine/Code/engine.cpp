@@ -252,15 +252,23 @@ void RenderScreenFillQuad(App* app, const FrameBuffer& aFBO)
     //Set the blending state
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //DONE - Lunes
+    glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->globalUBO.handle, 0, app->globalUBO.size);
 
     size_t iteration = 0;
-    const char* uniformNames[] = {"uAlbedo"};   //TODO: Poner aqui el resto de los nombres del shader
+    const char* uniformNames[] = { "uAlbedo", "uNormals", "uPosition", "uViewDir" };
     for (const auto& texture : aFBO.attachments)
     {
-        //Bind the textures
-        glUniform1i(glGetUniformLocation(programTexturedGeometry.handle, uniformNames[iteration]), 0);
+        //DONE - Lunes idk si esta bien o mal
+        GLuint uniformPosition = glGetUniformLocation(programTexturedGeometry.handle, uniformNames[iteration]);
+        glUniform1i(uniformPosition, iteration);
         glActiveTexture(GL_TEXTURE0 + iteration);
         glBindTexture(GL_TEXTURE_2D, texture.second);
+
+        //Bind the textures
+        //glUniform1i(glGetUniformLocation(programTexturedGeometry.handle, uniformNames[iteration]), 0);
+        //glActiveTexture(GL_TEXTURE0 + iteration);
+        //glBindTexture(GL_TEXTURE_2D, texture.second);
 
         ++iteration;
     }
@@ -341,7 +349,7 @@ void Init(App* app)
     //Program Init
     app->patrickIdx = LoadModel(app, "./Patrick/Patrick.obj");
 
-    app->texturedGeometryProgramIdx = LoadProgram(app, "RENDER_QUAD.glsl", "TEXTURED_GEOMETRY");
+    app->texturedGeometryProgramIdx = LoadProgram(app, "RENDER_QUAD.glsl", "RENDER_QUAD");
     app->geometryProgramIdx = LoadProgram(app, "RENDER_GEOMETRY.glsl", "RENDER_GEOMETRY");
 
     Program& quadProgram = app->programs[app->texturedGeometryProgramIdx];
@@ -409,7 +417,7 @@ void Init(App* app)
 
     app->mode = Mode_Forward_Geometry;
 
-    app->primaryFBO.CreateFBO(3, app->displaySize.x, app->displaySize.y);
+    app->primaryFBO.CreateFBO(4, app->displaySize.x, app->displaySize.y);
 
 }
 
@@ -497,8 +505,6 @@ void Render(App* app)
     {
         case Mode_TexturedQuad:
         {
-            // TODO: Draw your textured quad here!
-
             // Clear the framebuffer
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -532,14 +538,21 @@ void Render(App* app)
         break;
         case Mode_Forward_Geometry:
         {
-
-
             // Clear the framebuffer
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            //TODO
-            //glBindFramebuffer(GL_FRAMEBUFFER, );
+            glBindFramebuffer(GL_FRAMEBUFFER, app->primaryFBO.handle);
+
+            std::vector<GLuint> textures;
+            for (auto& it : app->primaryFBO.attachments)
+            {
+                textures.push_back(it.second);
+            }
+            glDrawBuffers(textures.size(), textures.data());
+
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             // Set the viewport
             glViewport(0, 0, app->displaySize.x, app->displaySize.y);
@@ -552,7 +565,7 @@ void Render(App* app)
             for (const auto& entity : app->entities)
             {
                 glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->entityUBO.handle, entity.entityBufferOffset, entity.entityBufferSize);
-                Model& model = app->models[app->patrickIdx];
+                Model& model = app->models[entity.modelIndex];
                 Mesh& mesh = app->meshes[model.meshIdx];
 
                 for (u32 i = 0; i < mesh.submeshes.size(); ++i)
@@ -570,9 +583,13 @@ void Render(App* app)
 
                     Submesh& submesh = mesh.submeshes[i];
                     glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+
+                    glBindTexture(GL_TEXTURE_2D, 0);
                 }
             }
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+            RenderScreenFillQuad(app, app->primaryFBO);
         }
         break;
 
@@ -583,13 +600,6 @@ void Render(App* app)
 void CleanUp(App* app)
 {
     ELOG("Cleaning Up Engine");
-
-    // TODO: Deinitialize your resources here!
-    // - vertex buffers
-    // - element/index buffers
-    // - vaos
-    // - programs (and retrieve uniform indices)
-    // - textures
 
     // Delete textures
     for (auto& texture : app->textures)
