@@ -219,9 +219,11 @@ void UpdateLights(App* app)
 
     PushUInt(app->globalUBO, app->lights.size());
 
-    for (size_t i = 0; i < app->lights.size(); i++)
+    for (size_t i = 0; i < app->lights.size(); ++i)
     {
-        AlignHead(app->globalUBO, sizeof(vec4));
+        //AlignHead(app->globalUBO, sizeof(vec4));
+        AlignHead(app->globalUBO, 16);
+
         Light& light = app->lights[i];
         PushUInt(app->globalUBO, static_cast<unsigned int>(light.type));
         PushVec3(app->globalUBO, light.color);
@@ -261,14 +263,10 @@ void RenderScreenFillQuad(App* app, const FrameBuffer& aFBO)
     {
         //DONE - Lunes idk si esta bien o mal
         GLuint uniformPosition = glGetUniformLocation(programTexturedGeometry.handle, uniformNames[iteration]);
-        glUniform1i(uniformPosition, iteration);
+
         glActiveTexture(GL_TEXTURE0 + iteration);
         glBindTexture(GL_TEXTURE_2D, texture.second);
-
-        //Bind the textures
-        //glUniform1i(glGetUniformLocation(programTexturedGeometry.handle, uniformNames[iteration]), 0);
-        //glActiveTexture(GL_TEXTURE0 + iteration);
-        //glBindTexture(GL_TEXTURE_2D, texture.second);
+        glUniform1i(uniformPosition, iteration);
 
         ++iteration;
     }
@@ -282,13 +280,6 @@ void RenderScreenFillQuad(App* app, const FrameBuffer& aFBO)
 
 void Init(App* app)
 {
-    // TODO: Initialize your resources here!
-    // - vertex buffers
-    // - element/index buffers
-    // - vaos
-    // - programs (and retrieve uniform indices)
-    // - textures
-
 
     //Get OpenGL extensions
     GLint numExtensions = 0;
@@ -383,8 +374,8 @@ void Init(App* app)
 
     
     //Lueces - entre otras cosas
-    app->lights.push_back({ LightType::Light_Directional, vec3(0.0, 0.0, 0.2), vec3(1.0, 0.0, 0.0), vec3(0.0) });
-    app->lights.push_back({ LightType::Light_Point, vec3(0.0, 0.0, 1.0), vec3(-1.0, 0.0, 0.0), vec3(0.0, 75.0, 0.0) });
+    app->lights.push_back({ LightType::Light_Directional, vec3(0.1, 0.1, 0.1), vec3(1.0, -1.0, -0.5), vec3(0.0) });
+    app->lights.push_back({ LightType::Light_Point, vec3(0.0, 0.0, 1.0), vec3(-1.0, 0.0, 0.0), vec3(20.0, -10.0, 20.0) });
 
     UpdateLights(app);
 

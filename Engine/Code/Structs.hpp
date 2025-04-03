@@ -152,6 +152,11 @@ struct FrameBuffer {
 
     bool CreateFBO(const uint64_t aAttachments, const uint64_t aWidth, const uint64_t aHeight)
     {
+        
+        GLenum internalFormat = GL_RGBA16F; //TODO: Meter esto con un bool para que sea rgba16f o rgba8
+        GLenum internalType = GL_FLOAT;   //TODO: Meter esto con un bool para que sea GL_FLOAT o GL_UNSIGNED_BYTE
+
+
         if (aAttachments > GL_MAX_COLOR_ATTACHMENTS)
         {
             return false;
@@ -164,7 +169,7 @@ struct FrameBuffer {
             GLuint colorAttachments;
             glGenTextures(1, &colorAttachments);
             glBindTexture(GL_TEXTURE_2D, colorAttachments);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, aWidth, aHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, aWidth, aHeight, 0, GL_RGBA, internalType, NULL);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);

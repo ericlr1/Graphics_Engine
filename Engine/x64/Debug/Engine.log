@@ -1,1 +1,13 @@
-﻿  Engine.vcxproj -> C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\x64\Debug\Engine.exe
+﻿  engine.cpp
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\Structs.hpp(172,68): warning C4244: 'argumento': conversión de 'const uint64_t' a 'GLsizei'; posible pérdida de datos
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\Structs.hpp(172,60): warning C4244: 'argumento': conversión de 'const uint64_t' a 'GLsizei'; posible pérdida de datos
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\Structs.hpp(185,70): warning C4244: 'argumento': conversión de 'const uint64_t' a 'GLsizei'; posible pérdida de datos
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\Structs.hpp(185,62): warning C4244: 'argumento': conversión de 'const uint64_t' a 'GLsizei'; posible pérdida de datos
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(17,1): warning C4005: 'ASSERT': redefinición de macro
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.h(101): message : vea la definición anterior de 'ASSERT'
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(394,55): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(402,59): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(437,57): warning C4305: 'argumento': truncamiento de 'double' a 'float'
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(446,60): warning C4305: 'argumento': truncamiento de 'double' a 'float'
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\Structs.hpp(210): warning C4715: 'FrameBuffer::CreateFBO': no todas las rutas de acceso de control devuelven un valor
+  Engine.vcxproj -> C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\x64\Debug\Engine.exe

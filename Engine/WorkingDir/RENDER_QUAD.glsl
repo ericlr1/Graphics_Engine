@@ -81,7 +81,7 @@ vec3 CalcDirLight(Light aLight, vec3 aNormal, vec3 aViewDir)
 
 void main()
 {
-	vec3 Albedo = texture(uAlbedo, vTexCoord).xyz;
+	vec3 Albedo = vec3(texture(uAlbedo, vTexCoord));
 	vec3 Normal = texture(uNormals, vTexCoord).xyz;
 	vec3 ViewDir = texture(uViewDir, vTexCoord).xyz;
 	vec3 Position = texture(uPosition, vTexCoord).xyz;
@@ -94,17 +94,17 @@ void main()
 		vec3 lightResult = vec3(0.0);
 		if(uLight[i].type == 0)
 		{
-			returnColor += CalcDirLight(uLight[i], Normal, ViewDir);
+			lightResult = CalcDirLight(uLight[i], Normal, ViewDir);
 		}
 		else if(uLight[i].type == 1)
 		{
-			returnColor += CalcPointLight(uLight[i], Normal, Position, ViewDir);
+			lightResult = CalcPointLight(uLight[i], Normal, Position, ViewDir);
 		}
-		//returnColor.rgb += lightResult * Albedo.rgb;
+		returnColor.rgb += lightResult * Albedo.rgb;
 		
 	}
 
-	oColor = vec4(returnColor * Albedo.rgb, 1.0);
+	oColor = vec4(returnColor, 1.0);
 }
 
 #endif

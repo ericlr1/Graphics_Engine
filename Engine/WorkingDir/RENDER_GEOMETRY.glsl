@@ -63,16 +63,10 @@ layout(location=3) out vec4 oViewDir;
 void main()
 {
 	oAlbedo = texture(uTexture, vTexCoord);
-	oNormals = vec4(vNormal, 0.0);
-	oPosition = vec4(vPosition, 0.0);
-	oViewDir = vec4(vViewDir, 0.0);
+	oNormals = vec4(vNormal, 1.0);
+	oPosition = vec4(vPosition, 1.0);
+	oViewDir = vec4(vViewDir, 1.0);
 }
 
 #endif
 #endif
-
-
-// NOTE: You can write several shaders in the same file if you want as
-// long as you embrace them within an #ifdef block (as you can see above).
-// The third parameter of the LoadProgram function in engine.cpp allows
-// chosing the shader you want to load by name.
