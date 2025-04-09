@@ -359,12 +359,29 @@ void Init(App* app)
     app->patrickTextureUniform = glGetUniformLocation(app->programs[app->geometryProgramIdx].handle, "uTexture");
 
     //WIP - Camera setup
-    float aspectRatio = (float)app->displaySize.x / (float)app->displaySize.y;
-    float znear = 0.1f;
-    float zfar = 1000.0f;
-    app->worldCamera.projectionMatrix = glm::perspective(glm::radians(60.0f), aspectRatio, znear, zfar);
-    app->worldCamera.position = vec3(-2, 8, 25);
-    app->worldCamera.viewMatrix = glm::lookAt(app->worldCamera.position, vec3(0, 2, 0), vec3(0, 1, 0));
+    {
+        float aspectRatio = (float)app->displaySize.x / (float)app->displaySize.y;
+        float znear = 0.1f;
+        float zfar = 1000.0f;
+        app->worldCamera.projectionMatrix = glm::perspective(glm::radians(60.0f), aspectRatio, znear, zfar);
+        app->worldCamera.position = vec3(-2, 8, 25);
+        app->worldCamera.viewMatrix = glm::lookAt(app->worldCamera.position, vec3(0, 2, 0), vec3(0, 1, 0));
+
+        // Extract initial front, right, and up from the view matrix
+        glm::mat4 view = app->worldCamera.viewMatrix;
+        app->worldCamera.right = glm::vec3(view[0][0], view[1][0], view[2][0]);
+        app->worldCamera.up = glm::vec3(view[0][1], view[1][1], view[2][1]);
+        app->worldCamera.front = -glm::vec3(view[0][2], view[1][2], view[2][2]);
+
+        // Calculate initial yaw and pitch
+        vec3 front = app->worldCamera.front;
+        app->worldCamera.yaw = glm::degrees(atan2(front.z, front.x));
+        app->worldCamera.pitch = glm::degrees(asin(front.y));
+
+        // Initialize other camera parameters
+        app->worldCamera.isRotating = false;
+        app->worldCamera.movementSpeed = 5.0f;
+    }
 
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
@@ -483,11 +500,94 @@ void Gui(App* app)
     ImGui::End();
 }
 
-void Update(App* app)
-{
-    // You can handle app->input keyboard/mouse here
+void Update(App* app) {
 
-    //TODO: Meter aqui que con un Ctrl + S haga un hotreload del shader
+    // Update the shaders in rundtime - Hot reload
+    {
+        for (auto& program : app->programs) {
+            u64 currentTimestamp = GetFileLastWriteTimestamp(program.filepath.c_str());
+            if (currentTimestamp > program.lastWriteTimestamp) {
+                // Recompile the shader
+                GLuint newHandle = CreateProgramFromSource(ReadTextFile(program.filepath.c_str()), program.programName.c_str());
+                if (newHandle != 0) {
+                    // Cleanup old shader
+                    glDeleteProgram(program.handle);
+                    program.handle = newHandle;
+                    program.lastWriteTimestamp = currentTimestamp;
+                    ILOG("Reloaded shader: %s", program.programName.c_str());
+                }
+            }
+        }
+    }
+    // Mouse rotation
+    if (app->input.mouseButtons[RIGHT] == BUTTON_PRESS) {
+        app->worldCamera.isRotating = true;
+    }
+    if (app->input.mouseButtons[RIGHT] == BUTTON_RELEASE) {
+        app->worldCamera.isRotating = false;
+    }
+
+    if (app->worldCamera.isRotating) {
+        ProcessMouseMovement(&app->worldCamera,
+            app->input.mouseDelta.x,
+            app->input.mouseDelta.y);
+    }
+
+    // Increment velocity with shift
+    float baseSpeed = app->worldCamera.movementSpeed;
+    float speedMultiplier = 1.0f;
+
+    if (app->input.keys[K_LSHIFT] == BUTTON_PRESSED) {
+        speedMultiplier = 2.0f; // Boost speed by x2
+    }
+
+    float velocity = baseSpeed * speedMultiplier * app->deltaTime;
+
+
+    
+
+    if (app->input.keys[K_W] == BUTTON_PRESSED)
+    {
+        app->worldCamera.position += app->worldCamera.front * velocity;
+    }
+    if (app->input.keys[K_S] == BUTTON_PRESSED)
+    {
+        app->worldCamera.position -= app->worldCamera.front * velocity;
+    }
+    if (app->input.keys[K_A] == BUTTON_PRESSED)
+    {
+        app->worldCamera.position -= app->worldCamera.right * velocity;
+    }
+    if (app->input.keys[K_D] == BUTTON_PRESSED)
+    {
+        app->worldCamera.position += app->worldCamera.right * velocity;
+    }
+    if (app->input.keys[K_Q] == BUTTON_PRESSED)
+    {
+        app->worldCamera.position += app->worldCamera.up * velocity;
+    }
+    if (app->input.keys[K_E] == BUTTON_PRESSED)
+    {
+        app->worldCamera.position -= app->worldCamera.up * velocity;
+    }
+
+    // Update matrices
+    app->worldCamera.viewMatrix = glm::lookAt(
+        app->worldCamera.position,
+        app->worldCamera.position + app->worldCamera.front,
+        app->worldCamera.up
+    );
+
+    // Update UBOs
+    glm::mat4 VP = app->worldCamera.projectionMatrix * app->worldCamera.viewMatrix;
+
+    MapBuffer(app->entityUBO, GL_WRITE_ONLY);
+    for (auto& entity : app->entities) {
+        size_t matrixOffset = entity.entityBufferOffset + sizeof(glm::mat4);
+        glm::mat4 newVPMatrix = VP * entity.worldMatrix;
+        memcpy((char*)app->entityUBO.data + matrixOffset, &newVPMatrix, sizeof(glm::mat4));
+    }
+    UnmapBuffer(app->entityUBO);
 }
 
 void Render(App* app)
@@ -680,4 +780,28 @@ GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program)
     submesh.vaos.push_back(vao);
     
     return vaoHandle;
+}
+
+void ProcessMouseMovement(Camera* camera, float xOffset, float yOffset)
+{
+    const float sensitivity = 0.1f;
+    xOffset *= sensitivity;
+    yOffset *= sensitivity;
+
+    camera->yaw += xOffset;
+    camera->pitch -= yOffset;
+
+    // Constrain pitch to avoid flipping
+    camera->pitch = glm::clamp(camera->pitch, -89.0f, 89.0f);
+
+    // Calculate new front vector
+    glm::vec3 front;
+    front.x = cos(glm::radians(camera->yaw)) * cos(glm::radians(camera->pitch));
+    front.y = sin(glm::radians(camera->pitch));
+    front.z = sin(glm::radians(camera->yaw)) * cos(glm::radians(camera->pitch));
+    camera->front = glm::normalize(front);
+
+    // Recalculate right and up vectors
+    camera->right = glm::normalize(glm::cross(camera->front, glm::vec3(0.0f, 1.0f, 0.0f)));
+    camera->up = glm::normalize(glm::cross(camera->right, camera->front));
 }

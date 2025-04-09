@@ -13,11 +13,21 @@ typedef glm::ivec2 ivec2;
 typedef glm::ivec3 ivec3;
 typedef glm::ivec4 ivec4;
 
-struct Camera 
+struct Camera
 {
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
+
     vec3 position;
+    vec3 front;
+    vec3 right;
+    vec3 up;
+
+    float movementSpeed;
+
+    bool isRotating;
+    float yaw;
+    float pitch;
 };
 
 // Declaración anticipada de "Buffer" si es necesario en otros headers

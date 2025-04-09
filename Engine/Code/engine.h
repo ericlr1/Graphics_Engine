@@ -24,3 +24,4 @@ u32 LoadTexture2D(App* app, const char* filepath);
 
 GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program);
 
+void ProcessMouseMovement(Camera* camera, float xOffset, float yOffset);
