@@ -339,6 +339,7 @@ void Init(App* app)
 
     //Program Init
     app->patrickIdx = LoadModel(app, "./Patrick/Patrick.obj");
+    u32 planeIdx = LoadModel(app, "./Patrick/Plane.obj");
 
     app->texturedGeometryProgramIdx = LoadProgram(app, "RENDER_QUAD.glsl", "RENDER_QUAD");
     app->geometryProgramIdx = LoadProgram(app, "RENDER_GEOMETRY.glsl", "RENDER_GEOMETRY");
@@ -349,12 +350,13 @@ void Init(App* app)
 
     app->programUniformTexture = glGetUniformLocation(app->programs[app->texturedGeometryProgramIdx].handle, "uTexture");
 
-    //Texture Init
-    app->diceTexIdx = LoadTexture2D(app, "dice.png");
-    app->whiteTexIdx = LoadTexture2D(app, "color_white.png");
-    app->blackTexIdx = LoadTexture2D(app, "color_black.png");
-    app->normalTexIdx = LoadTexture2D(app, "color_normal.png");
-    app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
+    ////Texture Init
+    //app->diceTexIdx = LoadTexture2D(app, "dice.png");
+    //app->whiteTexIdx = LoadTexture2D(app, "color_white.png");
+    //app->blackTexIdx = LoadTexture2D(app, "color_black.png");
+    //app->normalTexIdx = LoadTexture2D(app, "color_normal.png");
+    //app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
+    //app->planeTexIdx = LoadTexture2D(app, "Plane.png");
 
     app->patrickTextureUniform = glGetUniformLocation(app->programs[app->geometryProgramIdx].handle, "uTexture");
 
@@ -402,6 +404,22 @@ void Init(App* app)
 
     glm::mat4 VP = app->worldCamera.projectionMatrix * app->worldCamera.viewMatrix;
 
+    // Create plane entity - TODO: Fix this
+    {
+        //Entity entity;
+        //AlignHead(app->entityUBO, app->uniformBlockAlignment);
+        //entity.entityBufferOffset = app->entityUBO.head;
+
+        //entity.worldMatrix = glm::translate(glm::vec3(0, 0, 0));
+        //entity.modelIndex = planeIdx;
+
+        //PushMat4(app->entityUBO, entity.worldMatrix);
+        //PushMat4(app->entityUBO, VP * entity.worldMatrix);
+
+        //entity.entityBufferSize = app->entityUBO.head - entity.entityBufferOffset;
+        //app->entities.push_back(entity);
+    }
+
     for (int z = -2; z != 2; z++)
     {
         for (int x = -2; x != 2; x++)
@@ -420,7 +438,7 @@ void Init(App* app)
             app->entities.push_back(entity);
         }
     }
-
+    
     UnmapBuffer(app->entityUBO);
 
     app->mode = Mode_Forward_Geometry;

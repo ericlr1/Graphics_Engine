@@ -266,6 +266,7 @@ struct App
     u32 blackTexIdx;
     u32 normalTexIdx;
     u32 magentaTexIdx;
+    u32 planeTexIdx;
 
     // Mode
     Mode mode;
