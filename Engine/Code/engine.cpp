@@ -543,9 +543,7 @@ void Update(App* app) {
 
     float velocity = baseSpeed * speedMultiplier * app->deltaTime;
 
-
-    
-
+    // Key bindings
     if (app->input.keys[K_W] == BUTTON_PRESSED)
     {
         app->worldCamera.position += app->worldCamera.front * velocity;
@@ -564,11 +562,11 @@ void Update(App* app) {
     }
     if (app->input.keys[K_Q] == BUTTON_PRESSED)
     {
-        app->worldCamera.position += app->worldCamera.up * velocity;
+        app->worldCamera.position -= app->worldCamera.up * velocity;
     }
     if (app->input.keys[K_E] == BUTTON_PRESSED)
     {
-        app->worldCamera.position -= app->worldCamera.up * velocity;
+        app->worldCamera.position += app->worldCamera.up * velocity;
     }
 
     // Update matrices
