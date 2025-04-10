@@ -394,7 +394,14 @@ void Init(App* app)
     
     //Lueces - entre otras cosas
     app->lights.push_back({ LightType::Light_Directional, vec3(0.1, 0.1, 0.1), vec3(1.0, -1.0, -0.5), vec3(0.0) });
-    app->lights.push_back({ LightType::Light_Point, vec3(0.0, 0.0, 1.0), vec3(-1.0, 0.0, 0.0), vec3(20.0, -10.0, 20.0) });
+    for (size_t i = 0; i < 20; ++i)
+    {
+        for (size_t j = 0; j < 20; ++j)
+        {
+            app->lights.push_back({ LightType::Light_Point, vec3(0.0, 0.0, 0.1), vec3(0.0, 0.0, 0.0), vec3(i, -10.0, 0 + j) });
+            app->lights.push_back({ LightType::Light_Point, vec3(0.1, 0.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(i, 10.0, 0 + j) });
+        }
+    }
 
     UpdateLights(app);
 
@@ -441,7 +448,7 @@ void Init(App* app)
     
     UnmapBuffer(app->entityUBO);
 
-    app->mode = Mode_Forward_Geometry;
+    app->mode = Mode_Deferred_Geometry;
 
     app->primaryFBO.CreateFBO(4, app->displaySize.x, app->displaySize.y);
 
@@ -465,6 +472,7 @@ void Gui(App* app)
     ImGui::Separator();
     bool lightChanged = false;
     ImGui::Text("===== Lights Setup =====");
+    ImGui::Text("Light Count: %d", app->lights.size());
     for (auto& light : app->lights)
     {
         vec3 checkVector;
@@ -645,7 +653,7 @@ void Render(App* app)
                 
         }
         break;
-        case Mode_Forward_Geometry:
+        case Mode_Deferred_Geometry:
         {
             // Clear the framebuffer
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
