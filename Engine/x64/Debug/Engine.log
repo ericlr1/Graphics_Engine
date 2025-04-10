@@ -7,7 +7,7 @@ C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h
 C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\platform.h(101): message : vea la definición anterior de 'ASSERT'
 C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(411,55): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
 C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(419,59): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(454,57): warning C4305: 'argumento': truncamiento de 'double' a 'float'
-C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(463,60): warning C4305: 'argumento': truncamiento de 'double' a 'float'
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(456,57): warning C4305: 'argumento': truncamiento de 'double' a 'float'
+C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\engine.cpp(465,60): warning C4305: 'argumento': truncamiento de 'double' a 'float'
 C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\Code\Structs.hpp(220): warning C4715: 'FrameBuffer::CreateFBO': no todas las rutas de acceso de control devuelven un valor
   Engine.vcxproj -> C:\Users\ericlr1\Documents\GitHub\Graphics_Engine\Engine\x64\Debug\Engine.exe
