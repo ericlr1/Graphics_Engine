@@ -1,3 +1,4 @@
+
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -47,22 +48,15 @@ vec3 CalcPointLight(Light aLight, vec3 aNormal, vec3 aPosition, vec3 aViewDir)
 	vec3 lightDir = normalize(aLight.position - aPosition);
 	float diff = max(dot(aNormal, lightDir), 0.0);
 	vec3 reflectDir = reflect(-lightDir, aNormal);
-	float spec = pow(max(dot(aViewDir, reflectDir), 0.0), 2.0);
+	float spec = pow(max(dot(normalize(aViewDir), reflectDir), 0.0), 32.0); // Aumentar brillo
 
 	float distance = length(aLight.position - aPosition);
+	float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.032 * (distance * distance));
 
-	float constant = 1.0;
-	float linear = 0.09;
-	float quadratic = 0.032;
-	float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
-
-	vec3 ambient = aLight.color * 0.2;
+	vec3 ambient = aLight.color * 0.1;
 	vec3 diffuse = aLight.color * diff;
-	vec3 specular = 0.1 * spec * aLight.color;
-	ambient *= attenuation;
-	diffuse *= attenuation;
-	specular *= attenuation;
-	return (ambient + diffuse + specular);
+	vec3 specular = 0.5 * spec * aLight.color; // Aumentar especular
+	return (ambient + diffuse + specular) * attenuation;
 }
 
 vec3 CalcDirLight(Light aLight, vec3 aNormal, vec3 aViewDir)
@@ -70,41 +64,31 @@ vec3 CalcDirLight(Light aLight, vec3 aNormal, vec3 aViewDir)
     vec3 lightDir = normalize(-aLight.direction);
     float diff = max(dot(aNormal, lightDir), 0.0);
     vec3 reflectDir = reflect(-lightDir, aNormal);
-    float spec = pow(max(dot(aViewDir, reflectDir), 0.0), 2.0);
+    float spec = pow(max(dot(normalize(aViewDir), reflectDir), 0.0), 32.0);
     
-    vec3 ambient = aLight.color * 0.2;
+    vec3 ambient = aLight.color * 0.1;
     vec3 diffuse = aLight.color * diff;
-    vec3 specular = 0.1 * spec * aLight.color;
-
+    vec3 specular = 0.5 * spec * aLight.color;
     return (ambient + diffuse + specular);
 }
 
 void main()
 {
-	vec3 Albedo = vec3(texture(uAlbedo, vTexCoord));
-	vec3 Normal = texture(uNormals, vTexCoord).xyz;
-	vec3 ViewDir = texture(uViewDir, vTexCoord).xyz;
-	vec3 Position = texture(uPosition, vTexCoord).xyz;
+	vec3 Albedo = texture(uAlbedo, vTexCoord).rgb;
+	vec3 Normal = normalize(texture(uNormals, vTexCoord).rgb); // Normalizar
+	vec3 Position = texture(uPosition, vTexCoord).rgb;
+	vec3 ViewDir = normalize(texture(uViewDir, vTexCoord).rgb); // Normalizar
 
-
-	vec3 returnColor = vec3(0.0);
-
+	vec3 result = vec3(0.0);
 	for(int i = 0; i < uLightCount; ++i)
 	{
-		vec3 lightResult = vec3(0.0);
 		if(uLight[i].type == 0)
-		{
-			lightResult = CalcDirLight(uLight[i], Normal, ViewDir);
-		}
+			result += CalcDirLight(uLight[i], Normal, ViewDir) * Albedo;
 		else if(uLight[i].type == 1)
-		{
-			lightResult = CalcPointLight(uLight[i], Normal, Position, ViewDir);
-		}
-		returnColor.rgb += lightResult * Albedo.rgb;
-		
+			result += CalcPointLight(uLight[i], Normal, Position, ViewDir) * Albedo;
 	}
 
-	oColor = vec4(returnColor, 1.0);
+	oColor = vec4(result, 1.0);
 }
 
 #endif

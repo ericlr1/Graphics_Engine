@@ -221,12 +221,11 @@ void UpdateLights(App* app)
 
     for (size_t i = 0; i < app->lights.size(); ++i)
     {
-        //AlignHead(app->globalUBO, sizeof(vec4));
-        AlignHead(app->globalUBO, 16);
+        AlignHead(app->globalUBO, sizeof(vec4));
 
         Light& light = app->lights[i];
         PushUInt(app->globalUBO, static_cast<unsigned int>(light.type));
-        PushVec3(app->globalUBO, light.color);
+        PushVec3(app->globalUBO, light.color * light.intensity);
         PushVec3(app->globalUBO, light.direction);
         PushVec3(app->globalUBO, light.position);
     }
@@ -339,7 +338,7 @@ void Init(App* app)
 
     //Program Init
     app->patrickIdx = LoadModel(app, "./Patrick/Patrick.obj");
-    u32 planeIdx = LoadModel(app, "./Patrick/Plane.obj");
+    u32 planeIdx = LoadModel(app, "./Patrick/plane.obj");
 
     app->texturedGeometryProgramIdx = LoadProgram(app, "RENDER_QUAD.glsl", "RENDER_QUAD");
     app->geometryProgramIdx = LoadProgram(app, "RENDER_GEOMETRY.glsl", "RENDER_GEOMETRY");
@@ -351,12 +350,13 @@ void Init(App* app)
     app->programUniformTexture = glGetUniformLocation(app->programs[app->texturedGeometryProgramIdx].handle, "uTexture");
 
     ////Texture Init
-    //app->diceTexIdx = LoadTexture2D(app, "dice.png");
-    //app->whiteTexIdx = LoadTexture2D(app, "color_white.png");
-    //app->blackTexIdx = LoadTexture2D(app, "color_black.png");
-    //app->normalTexIdx = LoadTexture2D(app, "color_normal.png");
-    //app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
-    //app->planeTexIdx = LoadTexture2D(app, "Plane.png");
+    app->diceTexIdx = LoadTexture2D(app, "dice.png");
+    app->whiteTexIdx = LoadTexture2D(app, "color_white.png");
+    app->blackTexIdx = LoadTexture2D(app, "color_black.png");
+    app->normalTexIdx = LoadTexture2D(app, "color_normal.png");
+    app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
+
+    app->materials[app->models[planeIdx].materialIdx[0]].albedoTextureIdx = app->whiteTexIdx;
 
     app->patrickTextureUniform = glGetUniformLocation(app->programs[app->geometryProgramIdx].handle, "uTexture");
 
@@ -393,13 +393,14 @@ void Init(App* app)
 
     
     //Lueces - entre otras cosas
-    app->lights.push_back({ LightType::Light_Directional, vec3(0.1, 0.1, 0.1), vec3(1.0, -1.0, -0.5), vec3(0.0) });
-    for (size_t i = 0; i < 20; ++i)
+    app->lights.push_back({ LightType::Light_Directional, vec3(0.1, 0.1, 0.1), vec3(1.0, -1.0, -0.5), vec3(0.0), 0.5f });
+    for (size_t i = 0; i < 5; ++i)
     {
-        for (size_t j = 0; j < 20; ++j)
+        for (size_t j = 0; j < 5; ++j)
         {
-            app->lights.push_back({ LightType::Light_Point, vec3(0.0, 0.0, 0.1), vec3(0.0, 0.0, 0.0), vec3(i, -10.0, 0 + j) });
-            app->lights.push_back({ LightType::Light_Point, vec3(0.1, 0.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(i, 10.0, 0 + j) });
+            float lIntensity = 1.0f;
+            app->lights.push_back({ LightType::Light_Point, vec3(0.0, 0.0, 1.0), vec3(0.0, 0.0, 0.0), vec3((i - 25.0) * 5, -20.0, j * 5), lIntensity });
+            app->lights.push_back({ LightType::Light_Point, vec3(1.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(i * 5, 20.0, j * 5), lIntensity });
         }
     }
 
@@ -411,20 +412,20 @@ void Init(App* app)
 
     glm::mat4 VP = app->worldCamera.projectionMatrix * app->worldCamera.viewMatrix;
 
-    // Create plane entity - TODO: Fix this
+    // Create plane entity
     {
-        //Entity entity;
-        //AlignHead(app->entityUBO, app->uniformBlockAlignment);
-        //entity.entityBufferOffset = app->entityUBO.head;
+        Entity entity;
+        AlignHead(app->entityUBO, app->uniformBlockAlignment);
+        entity.entityBufferOffset = app->entityUBO.head;
 
-        //entity.worldMatrix = glm::translate(glm::vec3(0, 0, 0));
-        //entity.modelIndex = planeIdx;
+        entity.worldMatrix = glm::translate(glm::vec3(0, -3.5, 0));
+        entity.modelIndex = planeIdx;
 
-        //PushMat4(app->entityUBO, entity.worldMatrix);
-        //PushMat4(app->entityUBO, VP * entity.worldMatrix);
+        PushMat4(app->entityUBO, entity.worldMatrix);
+        PushMat4(app->entityUBO, VP * entity.worldMatrix);
 
-        //entity.entityBufferSize = app->entityUBO.head - entity.entityBufferOffset;
-        //app->entities.push_back(entity);
+        entity.entityBufferSize = app->entityUBO.head - entity.entityBufferOffset;
+        app->entities.push_back(entity);
     }
 
     for (int z = -2; z != 2; z++)
@@ -479,6 +480,7 @@ void Gui(App* app)
 
         ImGui::PushID(&light);
         float color[3] = { light.color.x, light.color.y, light.color.z };
+        ImGui::Text("ID: %d", (int) &light);
         ImGui::DragFloat3("Color", color, 0.01, 0.0, 1.0);
         checkVector = vec3(color[0], color[1], color[2]);
         if (checkVector != light.color)
@@ -622,34 +624,34 @@ void Render(App* app)
     {
         case Mode_TexturedQuad:
         {
-            // Clear the framebuffer
-            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            //// Clear the framebuffer
+            //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            // Set the viewport
-            glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+            //// Set the viewport
+            //glViewport(0, 0, app->displaySize.x, app->displaySize.y);
 
-            //Bind the program
-            Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx]; 
-            glUseProgram(programTexturedGeometry.handle); 
-            //Bind the VAO
-            glBindVertexArray(app->vao);
+            ////Bind the program
+            //Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx]; 
+            //glUseProgram(programTexturedGeometry.handle); 
+            ////Bind the VAO
+            //glBindVertexArray(app->vao);
 
-            //Set the blending state
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            ////Set the blending state
+            //glEnable(GL_BLEND);
+            //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            //Bind the texture into unit 0 (and make its texture sample from unit 0)
-            glUniform1i(app->programUniformTexture, 0); 
-            glActiveTexture(GL_TEXTURE0);
-            GLuint textureHandle = app->textures[app->diceTexIdx].handle;
-            glBindTexture(GL_TEXTURE_2D, textureHandle);
+            ////Bind the texture into unit 0 (and make its texture sample from unit 0)
+            //glUniform1i(app->programUniformTexture, 0); 
+            //glActiveTexture(GL_TEXTURE0);
+            //GLuint textureHandle = app->textures[app->diceTexIdx].handle;
+            //glBindTexture(GL_TEXTURE_2D, textureHandle);
 
-            //glDrawElements() -> De momento hardcoded a 6
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+            ////glDrawElements() -> De momento hardcoded a 6
+            //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
-            glBindVertexArray(0); 
-            glUseProgram(0);
+            //glBindVertexArray(0); 
+            //glUseProgram(0);
                 
         }
         break;
@@ -694,8 +696,8 @@ void Render(App* app)
                     u32 submeshMaterialIdx = model.materialIdx[i];
                     Material& submeshMaterial = app->materials[submeshMaterialIdx];
 
-                    glActiveTexture(GL_TEXTURE0);
-                    glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
+                        glActiveTexture(GL_TEXTURE0);
+                        glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
                     glUniform1i(app->patrickTextureUniform, 0);
 
                     Submesh& submesh = mesh.submeshes[i];

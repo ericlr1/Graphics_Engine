@@ -175,13 +175,10 @@ u32 LoadModel(App* app, const char* filename)
 
     if (!scene)
     {
-        if (!scene)
-        {
-            char errorMessage[256];
-            sprintf_s(errorMessage, "Error loading mesh %s: %s", filename, aiGetErrorString());
-            ELOG("Error loading mesh");
-            return UINT32_MAX;
-        }
+        char errorMessage[256];
+        sprintf_s(errorMessage, "Error loading mesh %s: %s", filename, aiGetErrorString());
+        ELOG("Error loading mesh");
+        return UINT32_MAX;
     }
 
     app->meshes.push_back(Mesh{});
@@ -195,7 +192,7 @@ u32 LoadModel(App* app, const char* filename)
 
     String directory = GetDirectoryPart(MakeString(filename));
 
-    // Create a list of materials
+    // Create materials list
     u32 baseMeshMaterialIndex = (u32)app->materials.size();
     for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
     {
@@ -208,6 +205,7 @@ u32 LoadModel(App* app, const char* filename)
 
     aiReleaseImport(scene);
 
+    // Buffer creation
     u32 vertexBufferSize = 0;
     u32 indexBufferSize = 0;
 

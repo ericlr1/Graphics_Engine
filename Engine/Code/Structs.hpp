@@ -151,6 +151,7 @@ struct Light
     vec3 color;
     vec3 direction;
     vec3 position;
+    float intensity;
 };
 
 struct FrameBuffer {
@@ -160,8 +161,14 @@ struct FrameBuffer {
     std::vector<std::pair<GLenum, GLuint>> attachments;
     GLuint depthHandle;
 
+    uint64_t _width;
+    uint64_t _height;
+
     bool CreateFBO(const uint64_t aAttachments, const uint64_t aWidth, const uint64_t aHeight)
     {
+        _width = aWidth;
+        _height = aHeight;
+
         
         GLenum internalFormat = GL_RGBA16F; //TODO: Meter esto con un bool para que sea rgba16f o rgba8
         GLenum internalType = GL_FLOAT;   //TODO: Meter esto con un bool para que sea GL_FLOAT o GL_UNSIGNED_BYTE
@@ -221,14 +228,24 @@ struct FrameBuffer {
 
     void Clean()
     {
-        glDeleteFramebuffers(1, &handle);   
         for (auto& texture : attachments)
         {
             glDeleteTextures(1, &texture.second);
             texture.second = 0;
         }
+        attachments.clear();
         glDeleteTextures(1, &depthHandle);
         depthHandle = 0;
+        glDeleteFramebuffers(1, &handle);
+    }
+
+    void Resize(uint64_t width, uint64_t height)
+    {
+        if (width == _width && height == _height || height == 0 || width == 0)
+            return;
+
+        Clean();
+        CreateFBO(4, width, height);
     }
 };
 

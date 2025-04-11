@@ -41,7 +41,11 @@ void main()
 {
 	vTexCoord = aTexCoord;
 	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
-	vNormal = vec3(uWorldMatrix * vec4(aNormal, 0.0));
+	
+	// Corregir transformación de normales
+	mat3 normalMatrix = transpose(inverse(mat3(uWorldMatrix)));
+	vNormal = normalize(normalMatrix * aNormal);
+	
 	vViewDir = uCameraPosition - vPosition;
 	gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
 }
@@ -53,7 +57,6 @@ in vec3 vPosition;
 in vec3 vNormal;
 in vec3 vViewDir;
 
-
 uniform sampler2D uTexture;
 layout(location=0) out vec4 oAlbedo;
 layout(location=1) out vec4 oNormals;
@@ -63,7 +66,7 @@ layout(location=3) out vec4 oViewDir;
 void main()
 {
 	oAlbedo = texture(uTexture, vTexCoord);
-	oNormals = vec4(vNormal, 1.0);
+	oNormals = vec4(normalize(vNormal), 1.0); // Asegurar normalización
 	oPosition = vec4(vPosition, 1.0);
 	oViewDir = vec4(vViewDir, 1.0);
 }
