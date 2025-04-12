@@ -389,9 +389,9 @@ void Init(App* app)
     {
         for (size_t j = 0; j < 20; ++j)
         {
-            float lIntensity = 0.5f;
-            app->lights.push_back({ LightType::Light_Point, vec3(0.0, 1.0, 1.0), vec3(0.0, 0.0, 0.0), vec3(i * 5 -40, 20.0, j * 5), lIntensity });
-            app->lights.push_back({ LightType::Light_Point, vec3(1.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(i * 5, 20.0, j * 5), lIntensity });
+            float lIntensity = 0.1f;
+            app->lights.push_back({ LightType::Light_Point, vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(i * 5 -40, 2.0, j * 5), lIntensity });
+            app->lights.push_back({ LightType::Light_Point, vec3(1.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(i * 5, 2.0, j * 5), lIntensity });
         }
     }
 
@@ -436,7 +436,20 @@ void Init(App* app)
             app->entities.push_back(entity);
         }
     }
+
+    Entity floatingPatrick;
+    AlignHead(app->entityUBO, app->uniformBlockAlignment);
+    floatingPatrick.entityBufferOffset = app->entityUBO.head;
+    floatingPatrick.modelIndex = app->patrickIdx;
+    floatingPatrick.worldMatrix = glm::mat4(1.0); // Initial position matrix
     
+    PushMat4(app->entityUBO, floatingPatrick.worldMatrix);
+    PushMat4(app->entityUBO, VP * floatingPatrick.worldMatrix);
+
+    floatingPatrick.entityBufferSize = app->entityUBO.head - floatingPatrick.entityBufferOffset;
+    app->entities.push_back(floatingPatrick);
+    app->floatingPatrickEntityIndex = app->entities.size() - 1;
+
     UnmapBuffer(app->entityUBO);
 
     app->debugMode = DebugMode_Combined;
@@ -609,11 +622,41 @@ void Update(App* app) {
     // Update UBOs
     glm::mat4 VP = app->worldCamera.projectionMatrix * app->worldCamera.viewMatrix;
 
+    // Update entities
     MapBuffer(app->entityUBO, GL_WRITE_ONLY);
     for (auto& entity : app->entities) {
         size_t matrixOffset = entity.entityBufferOffset + sizeof(glm::mat4);
         glm::mat4 newVPMatrix = VP * entity.worldMatrix;
         memcpy((char*)app->entityUBO.data + matrixOffset, &newVPMatrix, sizeof(glm::mat4));
+    }
+    UnmapBuffer(app->entityUBO);
+
+    // Update floating patrick
+    MapBuffer(app->entityUBO, GL_WRITE_ONLY);
+    for (size_t i = 0; i < app->entities.size(); ++i) {
+        auto& entity = app->entities[i];
+        if (i == app->floatingPatrickEntityIndex) {
+            static float time = 0.0f;
+            time += app->deltaTime;
+
+            // Floating animation
+            float yPos = sin(time) * 2.0f; // Adjust height and speed
+            // Spinning animation
+            glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), time, glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, yPos, 5.0f));
+            entity.worldMatrix = translation * rotation;
+
+            // Update both matrices in UBO
+            glm::mat4 newVPMatrix = VP * entity.worldMatrix;
+            memcpy((char*)app->entityUBO.data + entity.entityBufferOffset, &entity.worldMatrix, sizeof(glm::mat4));
+            memcpy((char*)app->entityUBO.data + entity.entityBufferOffset + sizeof(glm::mat4), &newVPMatrix, sizeof(glm::mat4));
+        }
+        else {
+            // Existing VP update
+            size_t matrixOffset = entity.entityBufferOffset + sizeof(glm::mat4);
+            glm::mat4 newVPMatrix = VP * entity.worldMatrix;
+            memcpy((char*)app->entityUBO.data + matrixOffset, &newVPMatrix, sizeof(glm::mat4));
+        }
     }
     UnmapBuffer(app->entityUBO);
 }

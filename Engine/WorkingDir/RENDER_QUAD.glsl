@@ -31,7 +31,7 @@ layout(binding=0, std140) uniform GlobalParams
 {
 	vec3 uCameraPosition;
 	unsigned int uLightCount;
-	Light uLight[16];
+	Light uLight[128];
 };
 
 in vec2 vTexCoord;

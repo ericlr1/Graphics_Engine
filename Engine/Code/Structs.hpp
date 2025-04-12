@@ -283,7 +283,9 @@ struct App
     u32 geometryProgramIdx;
 
     u32 patrickIdx;
+    u32 floatingPatrickEntityIndex;
     u32 patrickTextureUniform;
+
 
     // texture indices
     u32 diceTexIdx;
