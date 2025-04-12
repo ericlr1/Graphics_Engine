@@ -100,8 +100,10 @@ void main()
             result = Normal * 0.5 + 0.5; // Mapped to [0,1]
             break;
         case 3: // Position
-            float maxDistance = 50.0;
-            result = vec3(length(Position - uCameraPosition) / maxDistance);
+            //float maxDistance = 50.0;
+            //result = vec3(length(Position - uCameraPosition) / maxDistance);
+            // This result shows more information
+            result = Position;
             break;
         case 4: // Depth
             float near = 0.1;

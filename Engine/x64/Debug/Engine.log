@@ -1,18 +1,1 @@
-﻿  engine.cpp
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\Structs.hpp(190,64): warning C4244: 'argumento': conversión de 'const uint64_t' a 'GLsizei'; posible pérdida de datos
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\Structs.hpp(190,56): warning C4244: 'argumento': conversión de 'const uint64_t' a 'GLsizei'; posible pérdida de datos
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\Structs.hpp(201,70): warning C4244: 'argumento': conversión de 'const uint64_t' a 'GLsizei'; posible pérdida de datos
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\Structs.hpp(201,62): warning C4244: 'argumento': conversión de 'const uint64_t' a 'GLsizei'; posible pérdida de datos
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\buffer_managment.h(17,1): warning C4005: 'ASSERT': redefinición de macro
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\platform.h(101): message : vea la definición anterior de 'ASSERT'
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\engine.cpp(409,51): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\engine.cpp(417,55): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\engine.cpp(427,55): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\engine.cpp(435,59): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\engine.cpp(442,56): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\engine.cpp(449,60): warning C4244: '=': conversión de 'u64' a 'u32'; posible pérdida de datos
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\engine.cpp(496,43): warning C4311: 'conversión de tipo': truncamiento de puntero de 'Light *' a 'int'
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\engine.cpp(496,43): warning C4302: 'conversión de tipo': truncamiento de 'Light *' a 'int'
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\engine.cpp(497,57): warning C4305: 'argumento': truncamiento de 'double' a 'float'
-C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\Code\engine.cpp(506,60): warning C4305: 'argumento': truncamiento de 'double' a 'float'
-  Engine.vcxproj -> C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\x64\Debug\Engine.exe
+﻿  Engine.vcxproj -> C:\Users\cacah\OneDrive\Documentos\GitHub\Graphics_Engine\Engine\x64\Debug\Engine.exe
