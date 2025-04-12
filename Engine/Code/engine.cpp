@@ -236,41 +236,32 @@ void UpdateLights(App* app)
 void RenderScreenFillQuad(App* app, const FrameBuffer& aFBO)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    // Clear the framebuffer
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Set the viewport
-    glViewport(0, 0, app->displaySize.x, app->displaySize.y);
-
-    //Bind the program
-    Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx];
-    glUseProgram(programTexturedGeometry.handle);
-
-    //Bind the VAO
+    Program& quadProgram = app->programs[app->texturedGeometryProgramIdx];
+    glUseProgram(quadProgram.handle);
     glBindVertexArray(app->vao);
 
-    //Set the blending state
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //DONE - Lunes
-    glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->globalUBO.handle, 0, app->globalUBO.size);
-
-    size_t iteration = 0;
-    const char* uniformNames[] = { "uAlbedo", "uNormals", "uPosition", "uViewDir" };
-    for (const auto& texture : aFBO.attachments)
+    // Attach all the textures to the G-Buffer
+    const char* uniformNames[] = { "uAlbedo", "uNormals", "uPosition", "uViewDir", "uDepth" };
+    for (size_t i = 0; i < aFBO.attachments.size(); ++i)
     {
-        //DONE - Lunes idk si esta bien o mal
-        GLuint uniformPosition = glGetUniformLocation(programTexturedGeometry.handle, uniformNames[iteration]);
-
-        glActiveTexture(GL_TEXTURE0 + iteration);
-        glBindTexture(GL_TEXTURE_2D, texture.second);
-        glUniform1i(uniformPosition, iteration);
-
-        ++iteration;
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, aFBO.attachments[i].second);
+        glUniform1i(glGetUniformLocation(quadProgram.handle, uniformNames[i]), i);
     }
 
-    //glDrawElements() -> De momento hardcoded a 6
+    // Attach depth texture
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, aFBO.depthHandle);
+    glUniform1i(glGetUniformLocation(quadProgram.handle, "uDepth"), 4);
+
+    // Use debug mode
+    GLuint debugModeLoc = glGetUniformLocation(quadProgram.handle, "uDebugMode");
+    glUniform1i(debugModeLoc, static_cast<int>(app->debugMode));
+
+    // Draw quad
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 
     glBindVertexArray(0);
@@ -393,13 +384,13 @@ void Init(App* app)
 
     
     //Lueces - entre otras cosas
-    app->lights.push_back({ LightType::Light_Directional, vec3(0.1, 0.1, 0.1), vec3(1.0, -1.0, -0.5), vec3(0.0), 0.5f });
-    for (size_t i = 0; i < 5; ++i)
+    //app->lights.push_back({ LightType::Light_Directional, vec3(0.75), vec3(1.0, -1.0, -0.5), vec3(0.0), 1 });
+    for (size_t i = 0; i < 20; ++i)
     {
-        for (size_t j = 0; j < 5; ++j)
+        for (size_t j = 0; j < 20; ++j)
         {
-            float lIntensity = 1.0f;
-            app->lights.push_back({ LightType::Light_Point, vec3(0.0, 0.0, 1.0), vec3(0.0, 0.0, 0.0), vec3((i - 25.0) * 5, -20.0, j * 5), lIntensity });
+            float lIntensity = 0.5f;
+            app->lights.push_back({ LightType::Light_Point, vec3(0.0, 1.0, 1.0), vec3(0.0, 0.0, 0.0), vec3(i * 5 -40, 20.0, j * 5), lIntensity });
             app->lights.push_back({ LightType::Light_Point, vec3(1.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(i * 5, 20.0, j * 5), lIntensity });
         }
     }
@@ -411,7 +402,6 @@ void Init(App* app)
     MapBuffer(app->entityUBO, GL_WRITE_ONLY);
 
     glm::mat4 VP = app->worldCamera.projectionMatrix * app->worldCamera.viewMatrix;
-
     // Create plane entity
     {
         Entity entity;
@@ -449,6 +439,7 @@ void Init(App* app)
     
     UnmapBuffer(app->entityUBO);
 
+    app->debugMode = DebugMode_Combined;
     app->mode = Mode_Deferred_Geometry;
 
     app->primaryFBO.CreateFBO(4, app->displaySize.x, app->displaySize.y);
@@ -461,6 +452,15 @@ void Gui(App* app)
 
     ImGui::Begin("Info");
     ImGui::Text("FPS: %f", 1.0f/app->deltaTime);
+    ImGui::End();
+
+    ImGui::Begin("Settings");
+    ImGui::Text("===== View Mode =====");
+    const char* debugModes[] = { "Combined", "Albedo", "Normals", "Position", "Depth" };
+    int currentMode = static_cast<int>(app->debugMode);
+    if (ImGui::Combo("Render Mode", &currentMode, debugModes, DebugMode_Count)) {
+        app->debugMode = static_cast<DebugMode>(currentMode);
+    }
     ImGui::End();
 
     ImGui::Begin("OpenGL Info");

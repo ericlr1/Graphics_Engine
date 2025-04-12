@@ -83,6 +83,15 @@ enum Mode
     Mode_Count
 };
 
+enum DebugMode {
+    DebugMode_Combined,
+    DebugMode_Albedo,
+    DebugMode_Normals,
+    DebugMode_Position,
+    DebugMode_Depth,
+    DebugMode_Count
+};
+
 // Structures
 struct VertexBufferAttribute {
     u8 location;
@@ -166,65 +175,64 @@ struct FrameBuffer {
 
     bool CreateFBO(const uint64_t aAttachments, const uint64_t aWidth, const uint64_t aHeight)
     {
+        // Clean up if one already existed
+        Clean();
+
         _width = aWidth;
         _height = aHeight;
 
-        
-        GLenum internalFormat = GL_RGBA16F; //TODO: Meter esto con un bool para que sea rgba16f o rgba8
-        GLenum internalType = GL_FLOAT;   //TODO: Meter esto con un bool para que sea GL_FLOAT o GL_UNSIGNED_BYTE
-
-
-        if (aAttachments > GL_MAX_COLOR_ATTACHMENTS)
-        {
-            return false;
-        }
-
-        std::vector<GLenum> enums;
-
+        // 1. Create color attachments
         for (size_t i = 0; i < aAttachments; ++i)
         {
-            GLuint colorAttachments;
-            glGenTextures(1, &colorAttachments);
-            glBindTexture(GL_TEXTURE_2D, colorAttachments);
-            glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, aWidth, aHeight, 0, GL_RGBA, internalType, NULL);
+            GLuint colorAttachment;
+            glGenTextures(1, &colorAttachment);
+            glBindTexture(GL_TEXTURE_2D, colorAttachment);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, aWidth, aHeight, 0, GL_RGBA, GL_FLOAT, NULL);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glBindTexture(GL_TEXTURE_2D, 0);
-            attachments.push_back({ GL_COLOR_ATTACHMENT0 + i, colorAttachments });
-            enums.push_back(GL_COLOR_ATTACHMENT0 + i);
+            attachments.push_back({ GL_COLOR_ATTACHMENT0 + i, colorAttachment });
         }
 
+        // 2. Create depth texture
         glGenTextures(1, &depthHandle);
         glBindTexture(GL_TEXTURE_2D, depthHandle);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, aWidth, aHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_2D, 0);
 
+        // 3. Create framebuffer
         glGenFramebuffers(1, &handle);
         glBindFramebuffer(GL_FRAMEBUFFER, handle);
-        for (auto it = attachments.cbegin(); it != attachments.cend(); ++it)
-        {
-            glFramebufferTexture(GL_FRAMEBUFFER, it->first, it->second, 0);
-        }
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthHandle, 0);
 
-        GLenum frameBufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        if (frameBufferStatus != GL_FRAMEBUFFER_COMPLETE)
+        // Attach color textures
+        std::vector<GLenum> drawBuffers;
+        for (auto& attachment : attachments)
         {
-            throw std::runtime_error("Framebuffer creation error!");
+            glFramebufferTexture2D(GL_FRAMEBUFFER, attachment.first, GL_TEXTURE_2D, attachment.second, 0);
+            drawBuffers.push_back(attachment.first);
         }
 
-        glDrawBuffers(enums.size(), enums.data());
+        // Attach depth texture
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthHandle, 0);
+
+        // Set draw buffers
+        glDrawBuffers(drawBuffers.size(), drawBuffers.data());
+
+        // Check framebuffer status
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        {
+            Clean();
+            return false;
+        }
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+        return true;
     }
+
 
     void Clean()
     {
@@ -313,6 +321,8 @@ struct App
     std::vector<Light> lights;
 
     FrameBuffer primaryFBO;
+
+    DebugMode debugMode;
 };
 
 #endif // STRUCTS
