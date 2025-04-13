@@ -109,6 +109,7 @@ void main()
             float near = 0.1;
             float far = 1000.0;
             float depthLinear = (2.0 * near) / (far + near - Depth * (far - near));
+            depthLinear = 1.0 - depthLinear;
             result = vec3(depthLinear);
             break;
     }
