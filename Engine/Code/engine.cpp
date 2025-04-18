@@ -384,7 +384,7 @@ void Init(App* app)
 
     
     //Lueces - entre otras cosas
-    //app->lights.push_back({ LightType::Light_Directional, vec3(0.75), vec3(1.0, -1.0, -0.5), vec3(0.0), 1 });
+    app->lights.push_back({ LightType::Light_Directional, vec3(0.75), vec3(1.0, -1.0, -0.5), vec3(0.0), 1 });
     for (size_t i = 0; i < 20; ++i)
     {
         for (size_t j = 0; j < 20; ++j)
@@ -562,6 +562,29 @@ void Update(App* app) {
             }
         }
     }
+
+    // Agregar 200 nuevas luces en grid con la tecla L (sin borrar existentes)
+    if (app->input.keys[K_L] == BUTTON_PRESS)
+    {
+        const int gridSize = 20;
+        const float spacing = 5.0f;
+        const float offset = (gridSize * spacing) * 0.5f;
+
+        for (int x = 0; x < gridSize; ++x)
+        {
+            for (int z = 0; z < gridSize; ++z)
+            {
+                // Solo crear 200 luces (20x10)
+                if (x * gridSize + z >= 200) break;
+
+                vec3 position = vec3(x * spacing - offset, 2.0f, z * spacing - offset);
+                app->lights.push_back({ LightType::Light_Point, vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 0.0), position, 1.0 });
+
+            }
+        }
+        UpdateLights(app); // Actualizar UBO de luces
+    }
+
     // Mouse rotation
     if (app->input.mouseButtons[RIGHT] == BUTTON_PRESS) {
         app->worldCamera.isRotating = true;
