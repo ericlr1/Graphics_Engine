@@ -25,3 +25,5 @@ u32 LoadTexture2D(App* app, const char* filepath);
 GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program);
 
 void ProcessMouseMovement(Camera* camera, float xOffset, float yOffset);
+
+void CreateLight(App* app, LightType type, const glm::vec3& color, const glm::vec3& direction, const glm::vec3& position, float intensity);

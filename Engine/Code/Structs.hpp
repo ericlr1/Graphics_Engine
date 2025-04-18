@@ -161,6 +161,7 @@ struct Light
     vec3 direction;
     vec3 position;
     float intensity;
+    u32 entityIndex;
 };
 
 struct FrameBuffer {
@@ -281,6 +282,9 @@ struct App
     // program indices
     u32 texturedGeometryProgramIdx;
     u32 geometryProgramIdx;
+
+    u32 sphereIdx;
+    u32 coneIdx;
 
     u32 patrickIdx;
     u32 floatingPatrickEntityIndex;
