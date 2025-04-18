@@ -17,6 +17,8 @@ Motor gráfico implementando técnicas modernas de renderizado, desarrollado en 
 - **Q/E**: Ascender/Descender
 - **Botón derecho del ratón + arrastrar**: Rotar vista
 - **Shift**: Aumentar velocidad de movimiento
+### Controles de Debug
+- **L**: Añadir 200 luces en la escena en forma de grid
 
 ### Modos de Visualización
  Para cambiar entre los diferentes modos de visualización existe un menu deplegable en la GUI de la derecha, hay diferentes modos de visualización:
