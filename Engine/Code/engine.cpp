@@ -330,8 +330,6 @@ void Init(App* app)
     //Program Init
     app->patrickIdx = LoadModel(app, "./Patrick/Patrick.obj");
     u32 planeIdx = LoadModel(app, "./Patrick/plane.obj");
-    app->sphereIdx = LoadModel(app, "./Patrick/sphere.obj");
-    app->coneIdx = LoadModel(app, "./Patrick/cone.obj");
 
     app->texturedGeometryProgramIdx = LoadProgram(app, "RENDER_QUAD.glsl", "RENDER_QUAD");
     app->geometryProgramIdx = LoadProgram(app, "RENDER_GEOMETRY.glsl", "RENDER_GEOMETRY");
@@ -350,8 +348,6 @@ void Init(App* app)
     app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
 
     app->materials[app->models[planeIdx].materialIdx[0]].albedoTextureIdx = app->whiteTexIdx;
-    app->materials[app->models[app->sphereIdx].materialIdx[0]].albedoTextureIdx = app->whiteTexIdx;
-    app->materials[app->models[app->coneIdx].materialIdx[0]].albedoTextureIdx = app->whiteTexIdx;
 
     app->patrickTextureUniform = glGetUniformLocation(app->programs[app->geometryProgramIdx].handle, "uTexture");
 
@@ -582,7 +578,7 @@ void Update(App* app) {
                 if (x * gridSize + z >= 200) break;
 
                 vec3 position = vec3(x * spacing - offset, 2.0f, z * spacing - offset);
-                CreateLight(app, LightType::Light_Point, vec3(0.0, 1.0, 0.0), vec3(0.0), position, 1.0);
+                app->lights.push_back({ LightType::Light_Point, vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 0.0), position, 1.0 });
 
             }
         }
@@ -903,40 +899,3 @@ void ProcessMouseMovement(Camera* camera, float xOffset, float yOffset)
     camera->right = glm::normalize(glm::cross(camera->front, glm::vec3(0.0f, 1.0f, 0.0f)));
     camera->up = glm::normalize(glm::cross(camera->right, camera->front));
 }
-
-void CreateLight(App* app, LightType type, const glm::vec3& color, const glm::vec3& direction, const glm::vec3& position, float intensity) {    
-    
-    // Create the entity
-    Entity entity;
-    entity.modelIndex = app->sphereIdx;
-    entity.worldMatrix = glm::translate(position);
-    entity.worldMatrix = glm::scale(entity.worldMatrix, glm::vec3(0.2f)); // Scale down the model
-
-    // Map UBO
-    MapBuffer(app->entityUBO, GL_WRITE_ONLY);
-    AlignHead(app->entityUBO, app->uniformBlockAlignment);
-    entity.entityBufferOffset = app->entityUBO.head;
-
-    glm::mat4 VP = app->worldCamera.projectionMatrix * app->worldCamera.viewMatrix;
-    glm::mat4 MVP = VP * entity.worldMatrix;
-
-    PushMat4(app->entityUBO, entity.worldMatrix);
-    PushMat4(app->entityUBO, MVP);
-
-    entity.entityBufferSize = app->entityUBO.head - entity.entityBufferOffset;
-    app->entities.push_back(entity);
-    UnmapBuffer(app->entityUBO);
-
-    // Create the light
-    Light light;
-    light.type = type;
-    light.color = color;
-    light.direction = direction;
-    light.position = position;
-    light.intensity = intensity;
-    light.entityIndex = app->entities.size() - 1; 
-
-    app->lights.push_back(light);
-
-}
-
